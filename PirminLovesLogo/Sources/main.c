@@ -58,11 +58,15 @@ int main(void)
   #endif
   /*** End of RTOS startup code.  ***/
   /*** Processor Expert end of main routine. DON'T MODIFY THIS CODE!!! ***/
+<<<<<<< HEAD
   int i;
   for(;;){
 	  i++;
 	  i++;
   }
+=======
+  for(;;){}
+>>>>>>> master
   /*** Processor Expert end of main routine. DON'T WRITE CODE BELOW!!! ***/
 } /*** End of main routine. DO NOT MODIFY THIS TEXT!!! ***/
 
