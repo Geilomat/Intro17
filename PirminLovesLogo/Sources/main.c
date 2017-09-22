@@ -61,6 +61,7 @@ int main(void)
   int i;
   for(;;){
 	  i++;
+	  i++;
   }
   /*** Processor Expert end of main routine. DON'T WRITE CODE BELOW!!! ***/
 } /*** End of main routine. DO NOT MODIFY THIS TEXT!!! ***/
