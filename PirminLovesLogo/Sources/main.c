@@ -45,7 +45,7 @@ int main(void)
 
   /*** Processor Expert internal initialization. DON'T REMOVE THIS CODE!!! ***/
   PE_low_level_init();
-  int Pirmin;
+  unsigned long int Pirmin;
   /*** End of Processor Expert internal initialization.                    ***/
 
   /* Write your code here */
@@ -62,6 +62,7 @@ int main(void)
   int i;
   for(;;){
 	  i++;
+	  Pirmin += i;
   }
   /*** Processor Expert end of main routine. DON'T WRITE CODE BELOW!!! ***/
 } /*** End of main routine. DO NOT MODIFY THIS TEXT!!! ***/
