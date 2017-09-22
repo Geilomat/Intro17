@@ -45,6 +45,7 @@ int main(void)
 
   /*** Processor Expert internal initialization. DON'T REMOVE THIS CODE!!! ***/
   PE_low_level_init();
+  int Pirmin;
   /*** End of Processor Expert internal initialization.                    ***/
 
   /* Write your code here */
