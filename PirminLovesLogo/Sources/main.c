@@ -34,6 +34,8 @@
 #include "BitIoLdd1.h"
 #include "WAIT1.h"
 #include "MCUC1.h"
+#include "LEDL.h"
+#include "BitIoLdd2.h"
 /* Including shared modules, which are used for whole project */
 #include "PE_Types.h"
 #include "PE_Error.h"
@@ -57,8 +59,10 @@ int main(void)
   {
 	  WAIT1_Waitms(1000);
 	  LEDR_SetVal();
+	  LEDL_ClrVal();
 	  WAIT1_Waitms(1000);
 	  LEDR_ClrVal();
+	  LEDL_SetVal();
   }
 
 

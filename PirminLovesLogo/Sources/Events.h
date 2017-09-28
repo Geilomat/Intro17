@@ -37,6 +37,8 @@
 #include "BitIoLdd1.h"
 #include "WAIT1.h"
 #include "MCUC1.h"
+#include "LEDL.h"
+#include "BitIoLdd2.h"
 
 #ifdef __cplusplus
 extern "C" {
