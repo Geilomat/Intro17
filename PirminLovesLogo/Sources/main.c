@@ -30,14 +30,16 @@
 /* Including needed modules to compile this module/procedure */
 #include "Cpu.h"
 #include "Events.h"
+#include "LEDR.h"
+#include "BitIoLdd1.h"
+#include "WAIT1.h"
+#include "MCUC1.h"
 /* Including shared modules, which are used for whole project */
 #include "PE_Types.h"
 #include "PE_Error.h"
 #include "PE_Const.h"
 #include "IO_Map.h"
 /* User includes (#include below this line is not maintained by Processor Expert) */
-#include <stdio.h>
-#include <time.h>
 
 /*lint -save  -e970 Disable MISRA rule (6.3) checking. */
 int main(void)
@@ -53,7 +55,10 @@ int main(void)
   /* Write your code here */
   for(;;)
   {
-	  if(!time(0)%666) Pirmin++;
+	  WAIT1_Waitms(1000);
+	  LEDR_SetVal();
+	  WAIT1_Waitms(1000);
+	  LEDR_ClrVal();
   }
 
 
