@@ -15,7 +15,7 @@
 #define PL_LOCAL_CONFIG_BOARD_IS_ROBO     (1) /* I'm the ROBOT board */
 
 /* platform hardware configuration */
-#define PL_LOCAL_CONFIG_NOF_LEDS          (3) /* number of LEDs, 0 to 3 */
+#define PL_LOCAL_CONFIG_NOF_LEDS          (2) /* number of LEDs, 0 to 3 */
 #define PL_LOCAL_CONFIG_NOF_KEYS          (1) /* number of keys, 0 to 7 */
 
 #if PL_LOCAL_CONFIG_NOF_KEYS>0

@@ -188,11 +188,9 @@ void APP_Start(void) {
   for(;;) {
 	  LED2_On();
 	  LED1_Off();
-	  LED3_On();
 	  WAIT1_Waitms(200);
 	  LED1_On();
   	  LED2_Off();
-  	  LED3_Off();
   	  WAIT1_Waitms(200);
   }
 }
