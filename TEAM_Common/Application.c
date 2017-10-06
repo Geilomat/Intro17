@@ -185,6 +185,9 @@ void APP_Start(void) {
   __asm volatile("cpsie i"); /* enable interrupts */
 
 
+  MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT),50);
+  MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT),50);
+
   for(;;) {
 	  LED2_On();
 	  LED1_Off();
