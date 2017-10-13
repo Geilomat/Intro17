@@ -28,6 +28,7 @@
 
 #include "Cpu.h"
 #include "Events.h"
+#include "Event.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,6 +73,24 @@ void Cpu_OnNMIINT(void)
 void QuadInt_OnInterrupt(void)
 {
   /* Write your code here ... */
+}
+
+/*
+** ===================================================================
+**     Event       :  SwInterrupt_OnInterrupt (module Events)
+**
+**     Component   :  SwInterrupt [ExtInt]
+**     Description :
+**         This event is called when an active signal edge/level has
+**         occurred.
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+void SwInterrupt_OnInterrupt(void)
+{
+	EVNT_SetEvent(EVNT_LED_HEARTBEAT);
+
 }
 
 /* END Events */

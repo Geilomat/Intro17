@@ -92,11 +92,13 @@ void APP_EventHandler(EVNT_Handle event) {
   case EVNT_LED_HEARTBEAT:
     LED2_Neg();
     break;
+    /*
 #if PL_CONFIG_NOF_KEYS>=1
   case EVNT_SW1_PRESSED:
     BtnMsg(1, "pressed");
      break;
 #endif
+*/
     default:
       break;
    } /* switch */
@@ -179,24 +181,40 @@ static void APP_AdoptToHardware(void) {
 #endif
 }
 
+void write_to_rom(void) {
+	    *((int*)0x0) = 10; /* tries to write to address zero */
+	  }
+
+
+
+void eventReaction( event){
+	switch(event){
+		case EVNT_LED_OFF: LED1_Off();
+							LED2_Off();
+							break;
+
+		case EVNT_LED_HEARTBEAT: LED1_On(); LED2_On();
+			break;
+	}
+
+}
+
+
 void APP_Start(void) {
   PL_Init();
   APP_AdoptToHardware();
   __asm volatile("cpsie i"); /* enable interrupts */
 
+  void (*f)(int) = eventReaction;
 
   //MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT),50);
   //MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT),50);
 
   for(;;) {
-	  EnterCritical();
-	  LED2_On();
-	  LED1_Off();
-	  ExitCritical();
-	  WAIT1_Waitms(200);
-	  LED1_On();
-  	  LED2_Off();
-  	  WAIT1_Waitms(200);
+	  EVNT_HandleEvent(f,1);
+
+
+
   }
 }
 

@@ -37,8 +37,6 @@
 #include "BitIoLdd1.h"
 #include "LEDPin2.h"
 #include "BitIoLdd2.h"
-#include "SW1.h"
-#include "BitIoLdd3.h"
 #include "CLS1.h"
 #include "RTT1.h"
 #include "LED_IR.h"
@@ -88,6 +86,8 @@
 #include "MCUC1.h"
 #include "ADC_Bat.h"
 #include "TmDt1.h"
+#include "SwInterrupt.h"
+#include "ExtIntLdd3.h"
 #include "IFsh1.h"
 #include "IntFlashLdd1.h"
 #include "BUZ1.h"
@@ -135,6 +135,20 @@ void Cpu_OnNMIINT(void);
 ** ===================================================================
 */
 void QuadInt_OnInterrupt(void);
+
+void SwInterrupt_OnInterrupt(void);
+/*
+** ===================================================================
+**     Event       :  SwInterrupt_OnInterrupt (module Events)
+**
+**     Component   :  SwInterrupt [ExtInt]
+**     Description :
+**         This event is called when an active signal edge/level has
+**         occurred.
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
 
 /* END Events */
 
