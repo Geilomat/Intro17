@@ -181,40 +181,50 @@ static void APP_AdoptToHardware(void) {
 #endif
 }
 
-void write_to_rom(void) {
-	    *((int*)0x0) = 10; /* tries to write to address zero */
-	  }
-
-
-
-void eventReaction( event){
-	switch(event){
-		case EVNT_LED_OFF: LED1_Off();
-							LED2_Off();
-							break;
-
-		case EVNT_LED_HEARTBEAT: LED1_On(); LED2_On();
-			break;
-	}
-
+static void TestHF_1(void)  {
+  void(*f)(void) = 0;
+  f();
+  for(;;) {
+    __asm("nop");
+  }
 }
 
+static void TestHF_2(void) {
+  *((int*)0x1000) = 0;
+  for(;;) {
+    __asm("nop");
+  }
+}
+
+#if 0
+volatile int iii;
+static void TestCS(void) {
+  CS1_CriticalVariable()
+
+  CS1_EnterCritical();
+  iii++;
+  CS1_ExitCritical();
+}
+#endif
 
 void APP_Start(void) {
   PL_Init();
   APP_AdoptToHardware();
+  __asm volatile("cpsid i"); /* disable interrupts */
   __asm volatile("cpsie i"); /* enable interrupts */
-
-  void (*f)(int) = eventReaction;
-
-  //MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT),50);
-  //MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT),50);
-
+  //TestHF_1();
+  //TestHF_2();
+  EVNT_SetEvent(EVNT_STARTUP);
   for(;;) {
-	  EVNT_HandleEvent(f,1);
+   // TestCS();
+ //   LED1_On();
+  //  LED2_On();
+    __asm volatile("nop");
+    LED2_Off();
+    LED1_Off();
 
-
-
+    WAIT1_WaitOSms(500);
+    EVNT_HandleEvent(APP_EventHandler, TRUE);
   }
 }
 
