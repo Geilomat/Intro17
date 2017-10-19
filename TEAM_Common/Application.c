@@ -209,6 +209,7 @@ static void TestCS(void) {
 #endif
 
 void APP_Start(void) {
+  char hello[15] = "Hello Wolrd \0";
   PL_Init();
   APP_AdoptToHardware();
   __asm volatile("cpsid i"); /* disable interrupts */
@@ -224,6 +225,8 @@ void APP_Start(void) {
 
 
     WAIT1_WaitOSms(500);
+
+    CLS1_SendStr(hello[0],CLS1_GetStdio()->stdOut);
     LED2_Off();
         LED1_Off();
         KEY_Scan();
