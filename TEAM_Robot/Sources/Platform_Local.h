@@ -19,7 +19,7 @@
 #define PL_LOCAL_CONFIG_NOF_KEYS          (1) /* number of keys, 0 to 7 */
 
 #if PL_LOCAL_CONFIG_NOF_KEYS>0
-  #define PL_LOCAL_CONFIG_KEY_1_ISR         (0) /* if SW1 is using interrupts */
+  #define PL_LOCAL_CONFIG_KEY_1_ISR         (1) /* if SW1 is using interrupts */
   #define PL_LOCAL_CONFIG_KEY_2_ISR         (0) /* if SW2 is using interrupts */
   #define PL_LOCAL_CONFIG_KEY_3_ISR         (0) /* if SW3 is using interrupts */
   #define PL_LOCAL_CONFIG_KEY_4_ISR         (0) /* if SW4 is using interrupts */
@@ -32,7 +32,7 @@
 //#define PL_LOCAL_CONFIG_HAS_LEDS_DISABLED                 /* disable LEDs */
 //#define PL_LOCAL_CONFIG_HAS_EVENTS_DISABLED               /* disable events */
 //#define PL_LOCAL_CONFIG_HAS_TIMER_DISABLED                /* disable own timer */
-#define PL_LOCAL_CONFIG_HAS_KEYS_DISABLED                 /* disable key/push buttons */
+//#define PL_LOCAL_CONFIG_HAS_KEYS_DISABLED                 /* disable key/push buttons */
 #define PL_LOCAL_CONFIG_HAS_SHELL_DISABLED                /* disable shell */
 #define PL_LOCAL_CONFIG_HAS_TRIGGER_DISABLED              /* disable triggers */
 #define PL_LOCAL_CONFIG_HAS_DEBOUNCE_DISABLED             /* disable debouncing */

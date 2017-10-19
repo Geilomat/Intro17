@@ -92,13 +92,14 @@ void APP_EventHandler(EVNT_Handle event) {
   case EVNT_LED_HEARTBEAT:
     LED2_Neg();
     break;
-    /*
-#if PL_CONFIG_NOF_KEYS>=1
+
+	#if PL_CONFIG_NOF_KEYS>=1
   case EVNT_SW1_PRESSED:
-    BtnMsg(1, "pressed");
+	 BtnMsg(1, "pressed");
+	 LED1_On();
      break;
 #endif
-*/
+
     default:
       break;
    } /* switch */
@@ -216,14 +217,16 @@ void APP_Start(void) {
   //TestHF_2();
   EVNT_SetEvent(EVNT_STARTUP);
   for(;;) {
-   // TestCS();
- //   LED1_On();
+  //  TestCS();
+  //  LED1_On();
   //  LED2_On();
     __asm volatile("nop");
-    LED2_Off();
-    LED1_Off();
+
 
     WAIT1_WaitOSms(500);
+    LED2_Off();
+        LED1_Off();
+        KEY_Scan();
     EVNT_HandleEvent(APP_EventHandler, TRUE);
   }
 }

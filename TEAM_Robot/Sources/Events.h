@@ -37,6 +37,8 @@
 #include "BitIoLdd1.h"
 #include "LEDPin2.h"
 #include "BitIoLdd2.h"
+#include "SW1.h"
+#include "ExtIntLdd1.h"
 #include "TI1.h"
 #include "TimerIntLdd1.h"
 #include "TU1.h"
@@ -89,8 +91,6 @@
 #include "MCUC1.h"
 #include "ADC_Bat.h"
 #include "TmDt1.h"
-#include "SwInterrupt.h"
-#include "ExtIntLdd3.h"
 #include "IFsh1.h"
 #include "IntFlashLdd1.h"
 #include "BUZ1.h"
@@ -168,6 +168,20 @@ void SwInterrupt_OnInterrupt(void);
 ** ===================================================================
 */
 void TI1_OnInterrupt(void);
+
+void SW1_OnInterrupt(void);
+/*
+** ===================================================================
+**     Event       :  SW1_OnInterrupt (module Events)
+**
+**     Component   :  SW1 [ExtInt]
+**     Description :
+**         This event is called when an active signal edge/level has
+**         occurred.
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
 
 /* END Events */
 

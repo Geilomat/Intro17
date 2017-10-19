@@ -27,6 +27,7 @@
 /* MODULE Events */
 
 #include "Cpu.h"
+#include "Keys.h"
 #include "Events.h"
 #include "Event.h"
 
@@ -110,6 +111,23 @@ void SwInterrupt_OnInterrupt(void)
 void TI1_OnInterrupt(void)
 {
   /* Write your code here ... */
+}
+
+/*
+** ===================================================================
+**     Event       :  SW1_OnInterrupt (module Events)
+**
+**     Component   :  SW1 [ExtInt]
+**     Description :
+**         This event is called when an active signal edge/level has
+**         occurred.
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+void SW1_OnInterrupt(void)
+{
+	KEY_OnInterrupt(KEY_BTN1);
 }
 
 /* END Events */
