@@ -96,8 +96,39 @@ void APP_EventHandler(EVNT_Handle event) {
 	#if PL_CONFIG_NOF_KEYS>=1
   case EVNT_SW1_PRESSED:
 	 BtnMsg(1, "pressed");
-	 LED2_Neg();
+	 LED1_Neg();
      break;
+
+  case EVNT_SW2_PRESSED:
+	 LED1_On();
+	 BtnMsg(2, "pressed");
+	 break;
+
+  case EVNT_SW3_PRESSED:
+  	 LED1_On();
+  	BtnMsg(3, "pressed");
+  	 break;
+
+  case EVNT_SW4_PRESSED:
+  	 LED1_On();
+  	BtnMsg(4, "pressed");
+  	 break;
+
+  case EVNT_SW5_PRESSED:
+  	 LED1_On();
+  	BtnMsg(5, "pressed");
+  	 break;
+
+  case EVNT_SW6_PRESSED:
+  	 LED1_On();
+  	BtnMsg(6, "pressed");
+  	 break;
+
+  case EVNT_SW7_PRESSED:
+  	 LED1_On();
+  	BtnMsg(7, "pressed");
+  	 break;
+
 #endif
 
     default:

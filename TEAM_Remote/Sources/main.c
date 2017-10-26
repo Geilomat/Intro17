@@ -39,6 +39,8 @@
 #include "TimerIntLdd1.h"
 #include "TU1.h"
 #include "CLS1.h"
+#include "AS1.h"
+#include "ASerialLdd1.h"
 #include "RTT1.h"
 #include "SW1.h"
 #include "BitIoLdd10.h"
