@@ -37,7 +37,7 @@
 #define PL_LOCAL_CONFIG_HAS_TRIGGER_DISABLED              /* disable triggers */
 #define PL_LOCAL_CONFIG_HAS_DEBOUNCE_DISABLED             /* disable debouncing */
 #define PL_LOCAL_CONFIG_HAS_RTOS_DISABLED                 /* disable RTOS usage */
-#define PL_LOCAL_CONFIG_HAS_SEGGER_RTT_DISABLED           /* disable Segger RTT */
+//#define PL_LOCAL_CONFIG_HAS_SEGGER_RTT_DISABLED           /* disable Segger RTT */
 #define PL_LOCAL_CONFIG_HAS_USB_CDC_DISABLED              /* disable USB CDC */
 #define PL_LOCAL_CONFIG_HAS_SHELL_QUEUE_DISABLED          /* disable shell queue */
 #define PL_LOCAL_CONFIG_HAS_SQUEUE_SINGLE_CHAR_DISABLED   /* disable single character support in shell queue */
@@ -58,7 +58,7 @@
 #define PL_LOCAL_CONFIG_HAS_BUZZER_DISABLED               /* disable buzzer (only on robot) */
 #define PL_LOCAL_CONFIG_HAS_REFLECTANCE_DISABLED          /* disable IR reflectance sensor */
 #define PL_LOCAL_CONFIG_HAS_BLUETOOTH_DISABLED            /* disable Bluetooth */
-//#define PL_LOCAL_CONFIG_HAS_MOTOR_DISABLED                /* disable motor */
+#define PL_LOCAL_CONFIG_HAS_MOTOR_DISABLED                /* disable motor */
 #define PL_LOCAL_CONFIG_HAS_QUADRATURE_DISABLED           /* disable quadrature encoder */
 #define PL_LOCAL_CONFIG_HAS_MPC4728_DISABLED              /* disable MPC4728 (only for V1 robot) */
 #define PL_LOCAL_CONFIG_HAS_QUAD_CALIBRATION_DISABLED     /* disable quadrature calibration (only for V1 robot) */

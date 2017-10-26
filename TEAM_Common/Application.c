@@ -96,7 +96,7 @@ void APP_EventHandler(EVNT_Handle event) {
 	#if PL_CONFIG_NOF_KEYS>=1
   case EVNT_SW1_PRESSED:
 	 BtnMsg(1, "pressed");
-	 LED1_On();
+	 LED2_Neg();
      break;
 #endif
 
@@ -209,7 +209,6 @@ static void TestCS(void) {
 #endif
 
 void APP_Start(void) {
-  char hello[15] = "Hello Wolrd \0";
   PL_Init();
   APP_AdoptToHardware();
   __asm volatile("cpsid i"); /* disable interrupts */
@@ -226,10 +225,8 @@ void APP_Start(void) {
 
     WAIT1_WaitOSms(500);
 
-    CLS1_SendStr(hello[0],CLS1_GetStdio()->stdOut);
-    LED2_Off();
-        LED1_Off();
-        KEY_Scan();
+    CLS1_SendStr("hello\n",CLS1_GetStdio()->stdOut);
+    KEY_Scan();
     EVNT_HandleEvent(APP_EventHandler, TRUE);
   }
 }

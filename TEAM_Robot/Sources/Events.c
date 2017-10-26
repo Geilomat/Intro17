@@ -78,24 +78,6 @@ void QuadInt_OnInterrupt(void)
 
 /*
 ** ===================================================================
-**     Event       :  SwInterrupt_OnInterrupt (module Events)
-**
-**     Component   :  SwInterrupt [ExtInt]
-**     Description :
-**         This event is called when an active signal edge/level has
-**         occurred.
-**     Parameters  : None
-**     Returns     : Nothing
-** ===================================================================
-*/
-void SwInterrupt_OnInterrupt(void)
-{
-	EVNT_SetEvent(EVNT_LED_HEARTBEAT);
-
-}
-
-/*
-** ===================================================================
 **     Event       :  TI1_OnInterrupt (module Events)
 **
 **     Component   :  TI1 [TimerInt]

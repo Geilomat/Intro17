@@ -92,7 +92,7 @@
 #if CLS1_DEFAULT_SERIAL
   #error "Default is RTT. Disable any Shell default connection in the component properties, as we are setting it a runtime!"
 #endif
-#define SHELL_CONFIG_HAS_SHELL_UART  (0 && !PL_CONFIG_BOARD_IS_ROBO_V1) /* use AsynchroSerial, V1 uses the Bluetooth on the UART */
+#define SHELL_CONFIG_HAS_SHELL_UART  (1 && !PL_CONFIG_BOARD_IS_ROBO_V1) /* use AsynchroSerial, V1 uses the Bluetooth on the UART */
 #define SHELL_CONFIG_HAS_SHELL_RTT   (1 && PL_CONFIG_HAS_SEGGER_RTT) /* use SEGGER RTT */
 #define SHELL_CONFIG_HAS_SHELL_CDC   (1 && PL_CONFIG_HAS_USB_CDC) /* use USB CDC */
 
