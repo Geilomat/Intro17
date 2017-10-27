@@ -28,6 +28,7 @@
 
 #include "Cpu.h"
 #include "Events.h"
+#include "Keys.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -70,7 +71,41 @@ void Cpu_OnNMIINT(void)
 */
 void TI1_OnInterrupt(void)
 {
-  /* Write your code here ... */
+
+}
+
+/*
+** ===================================================================
+**     Event       :  SW5_OnInterrupt (module Events)
+**
+**     Component   :  SW5 [ExtInt]
+**     Description :
+**         This event is called when an active signal edge/level has
+**         occurred.
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+void SW5_OnInterrupt(void)
+{
+  KEY_OnInterrupt(KEY_BTN5);
+}
+
+/*
+** ===================================================================
+**     Event       :  SW1_OnInterrupt (module Events)
+**
+**     Component   :  SW1 [ExtInt]
+**     Description :
+**         This event is called when an active signal edge/level has
+**         occurred.
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+void SW1_OnInterrupt(void)
+{
+  KEY_OnInterrupt(KEY_BTN1);
 }
 
 /* END Events */

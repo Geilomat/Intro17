@@ -144,20 +144,6 @@ void Cpu_OnNMIINT(void);
 */
 void QuadInt_OnInterrupt(void);
 
-void SwInterrupt_OnInterrupt(void);
-/*
-** ===================================================================
-**     Event       :  SwInterrupt_OnInterrupt (module Events)
-**
-**     Component   :  SwInterrupt [ExtInt]
-**     Description :
-**         This event is called when an active signal edge/level has
-**         occurred.
-**     Parameters  : None
-**     Returns     : Nothing
-** ===================================================================
-*/
-
 /*
 ** ===================================================================
 **     Event       :  TI1_OnInterrupt (module Events)

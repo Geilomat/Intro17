@@ -3,7 +3,7 @@
   <Header>
     <Name>TEAM_Remote</Name>
     <SavedBy>Erich Styger Local</SavedBy>
-    <ModificationStamp>127</ModificationStamp>
+    <ModificationStamp>130</ModificationStamp>
     <Date>2016-09-20</Date>
     <IDE>Eclipse IDE</IDE>
     <PEversion>1.12.2.RT7_b1550-0615</PEversion>
@@ -29,7 +29,7 @@
     <UseExistingModules>true</UseExistingModules>
     <RenamePeripheries>false</RenamePeripheries>
     <Autodependency>true</Autodependency>
-    <ProjectCompNumb>490</ProjectCompNumb>
+    <ProjectCompNumb>494</ProjectCompNumb>
     <DelUnusedPreviouslyGenFiles>true</DelUnusedPreviouslyGenFiles>
     <GeneratedCodeFrozen>false</GeneratedCodeFrozen>
     <AssignInitComponentNameToPrph>true</AssignInitComponentNameToPrph>
@@ -5394,9 +5394,9 @@
       <ItemId17>56</ItemId17>
       <Value17>true</Value17>
       <ItemId18>57</ItemId18>
-      <Value18>true</Value18>
+      <Value18>false</Value18>
       <ItemId19>59</ItemId19>
-      <Value19>false</Value19>
+      <Value19>true</Value19>
       <ItemId20>61</ItemId20>
       <Value20>true</Value20>
       <ItemId21>63</ItemId21>
@@ -5410,9 +5410,9 @@
       <ItemId25>71</ItemId25>
       <Value25>false</Value25>
       <ItemId26>73</ItemId26>
-      <Value26>true</Value26>
+      <Value26>false</Value26>
       <ItemId27>75</ItemId27>
-      <Value27>false</Value27>
+      <Value27>true</Value27>
       <ItemId28>77</ItemId28>
       <Value28>true</Value28>
       <ItemId29>79</ItemId29>
@@ -16119,7 +16119,7 @@
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Value>500</Value>
+        <Value>20</Value>
         <Base>DEC</Base>
       </ItemState>
       <ItemState>
@@ -16238,7 +16238,7 @@
         <ItemSymbol>Serial</ItemSymbol>
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
-        <Value>RTT1</Value>
+        <Value>AS1</Value>
       </ItemState>
       <ItemState>
         <ItemSymbol>Utility</ItemSymbol>
@@ -26633,7 +26633,7 @@
     <BeanType>BitIO</BeanType>
     <Name>SW1</Name>
     <CompNumb>57</CompNumb>
-    <CompEnabled>true</CompEnabled>
+    <CompEnabled>false</CompEnabled>
     <GenCodeMode>ALWAYS_WRITE</GenCodeMode>
     <IconName>BITIO</IconName>
     <UserFolderName>SW</UserFolderName>
@@ -26846,7 +26846,7 @@
             </ItemState>
             <ItemState>
               <ItemSymbol>Deinit</ItemSymbol>
-              <ReadOnly>false</ReadOnly>
+              <ReadOnly>true</ReadOnly>
               <UserReadOnly>false</UserReadOnly>
               <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
               <Index>1</Index>
@@ -26857,7 +26857,7 @@
             </ItemState>
             <ItemState>
               <ItemSymbol>GetDir</ItemSymbol>
-              <ReadOnly>false</ReadOnly>
+              <ReadOnly>true</ReadOnly>
               <UserReadOnly>false</UserReadOnly>
               <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
               <Index>1</Index>
@@ -26961,7 +26961,7 @@
             </ItemState>
             <ItemState>
               <ItemSymbol>ConnectPin</ItemSymbol>
-              <ReadOnly>false</ReadOnly>
+              <ReadOnly>true</ReadOnly>
               <UserReadOnly>false</UserReadOnly>
               <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
               <Index>1</Index>
@@ -26977,7 +26977,7 @@
             </ItemState>
             <ItemState>
               <ItemSymbol>GetRawVal</ItemSymbol>
-              <ReadOnly>false</ReadOnly>
+              <ReadOnly>true</ReadOnly>
               <UserReadOnly>false</UserReadOnly>
               <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
               <Index>1</Index>
@@ -27223,7 +27223,7 @@
     <BeanType>ExtInt</BeanType>
     <Name>SW1</Name>
     <CompNumb>59</CompNumb>
-    <CompEnabled>false</CompEnabled>
+    <CompEnabled>true</CompEnabled>
     <GenCodeMode>ALWAYS_WRITE</GenCodeMode>
     <IconName>EXTINT</IconName>
     <UserFolderName>SW</UserFolderName>
@@ -27411,7 +27411,7 @@
             </ItemState>
             <ItemState>
               <ItemSymbol>Deinit</ItemSymbol>
-              <ReadOnly>true</ReadOnly>
+              <ReadOnly>false</ReadOnly>
               <UserReadOnly>false</UserReadOnly>
               <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
               <Index>1</Index>
@@ -27455,7 +27455,7 @@
             </ItemState>
             <ItemState>
               <ItemSymbol>SetEdge</ItemSymbol>
-              <ReadOnly>true</ReadOnly>
+              <ReadOnly>false</ReadOnly>
               <UserReadOnly>false</UserReadOnly>
               <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
               <Index>1</Index>
@@ -27488,7 +27488,7 @@
             </ItemState>
             <ItemState>
               <ItemSymbol>ConnectPin</ItemSymbol>
-              <ReadOnly>true</ReadOnly>
+              <ReadOnly>false</ReadOnly>
               <UserReadOnly>false</UserReadOnly>
               <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
               <Index>1</Index>
@@ -31301,7 +31301,7 @@
     <BeanType>BitIO</BeanType>
     <Name>SW5</Name>
     <CompNumb>73</CompNumb>
-    <CompEnabled>true</CompEnabled>
+    <CompEnabled>false</CompEnabled>
     <GenCodeMode>ALWAYS_WRITE</GenCodeMode>
     <IconName>BITIO</IconName>
     <UserFolderName>SW</UserFolderName>
@@ -31514,7 +31514,7 @@
             </ItemState>
             <ItemState>
               <ItemSymbol>Deinit</ItemSymbol>
-              <ReadOnly>false</ReadOnly>
+              <ReadOnly>true</ReadOnly>
               <UserReadOnly>false</UserReadOnly>
               <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
               <Index>1</Index>
@@ -31525,7 +31525,7 @@
             </ItemState>
             <ItemState>
               <ItemSymbol>GetDir</ItemSymbol>
-              <ReadOnly>false</ReadOnly>
+              <ReadOnly>true</ReadOnly>
               <UserReadOnly>false</UserReadOnly>
               <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
               <Index>1</Index>
@@ -31629,7 +31629,7 @@
             </ItemState>
             <ItemState>
               <ItemSymbol>ConnectPin</ItemSymbol>
-              <ReadOnly>false</ReadOnly>
+              <ReadOnly>true</ReadOnly>
               <UserReadOnly>false</UserReadOnly>
               <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
               <Index>1</Index>
@@ -31645,7 +31645,7 @@
             </ItemState>
             <ItemState>
               <ItemSymbol>GetRawVal</ItemSymbol>
-              <ReadOnly>false</ReadOnly>
+              <ReadOnly>true</ReadOnly>
               <UserReadOnly>false</UserReadOnly>
               <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
               <Index>1</Index>
@@ -31891,7 +31891,7 @@
     <BeanType>ExtInt</BeanType>
     <Name>SW5</Name>
     <CompNumb>75</CompNumb>
-    <CompEnabled>false</CompEnabled>
+    <CompEnabled>true</CompEnabled>
     <GenCodeMode>ALWAYS_WRITE</GenCodeMode>
     <IconName>EXTINT</IconName>
     <UserFolderName>SW</UserFolderName>
@@ -32079,7 +32079,7 @@
             </ItemState>
             <ItemState>
               <ItemSymbol>Deinit</ItemSymbol>
-              <ReadOnly>true</ReadOnly>
+              <ReadOnly>false</ReadOnly>
               <UserReadOnly>false</UserReadOnly>
               <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
               <Index>1</Index>
@@ -32123,7 +32123,7 @@
             </ItemState>
             <ItemState>
               <ItemSymbol>SetEdge</ItemSymbol>
-              <ReadOnly>true</ReadOnly>
+              <ReadOnly>false</ReadOnly>
               <UserReadOnly>false</UserReadOnly>
               <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
               <Index>1</Index>
@@ -32156,7 +32156,7 @@
             </ItemState>
             <ItemState>
               <ItemSymbol>ConnectPin</ItemSymbol>
-              <ReadOnly>true</ReadOnly>
+              <ReadOnly>false</ReadOnly>
               <UserReadOnly>false</UserReadOnly>
               <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
               <Index>1</Index>
