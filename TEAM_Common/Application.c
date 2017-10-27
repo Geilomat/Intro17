@@ -248,6 +248,7 @@ void APP_Start(void) {
   //TestHF_1();
   //TestHF_2();
   EVNT_SetEvent(EVNT_STARTUP);
+  BUZ_PlayTune(BUZ_TUNE_WELCOME);
   for(;;) {
   //  TestCS();
   //  LED1_On();
@@ -255,11 +256,12 @@ void APP_Start(void) {
     __asm volatile("nop");
 
 
-    WAIT1_WaitOSms(500);
+    /*WAIT1_WaitOSms(500);
 
     CLS1_SendStr("hello\n",CLS1_GetStdio()->stdOut);
     KEY_Scan();
     EVNT_HandleEvent(APP_EventHandler, TRUE);
+    */
   }
 }
 
