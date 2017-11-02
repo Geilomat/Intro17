@@ -248,7 +248,7 @@ void APP_Start(void) {
   //TestHF_1();
   //TestHF_2();
   EVNT_SetEvent(EVNT_STARTUP);
-  BUZ_PlayTune(BUZ_TUNE_WELCOME);
+  //BUZ_PlayTune(BUZ_TUNE_WELCOME);
   for(;;) {
   //  TestCS();
   //  LED1_On();

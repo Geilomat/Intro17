@@ -71,7 +71,7 @@ void Cpu_OnNMIINT(void)
 */
 void TI1_OnInterrupt(void)
 {
-
+	TMR_OnInterrupt();
 }
 
 /*
