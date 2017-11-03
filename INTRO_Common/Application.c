@@ -259,30 +259,54 @@ static void APP_AdoptToHardware(void) {
 }
 
 
+static void BlinkyTask(void *pvParameters) {
+	TickType_t xLastWakeTime = xTaskGetTickCount();
+	for(;;) {
+		LED_Neg(1);
+		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(500));
+	}
+}
+
+static void EventHandler(void* pvParameters) {
+	TickType_t xLastWakeTime = xTaskGetTickCount();
+	for(;;) {
+
+#if PL_CONFIG_HAS_DEBOUNCE
+		KEYDBNC_Process();
+#else
+	    KEY_Scan(); /* scan keys and set events */
+#endif
+
+		EVNT_HandleEvent(APP_EventHandler, TRUE);
+		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(50));
+	}
+}
+
 void APP_Start(void) {
   PL_Init();
   APP_AdoptToHardware();
   __asm volatile("cpsid i"); /* disable interrupts */
   __asm volatile("cpsie i"); /* enable interrupts */
-  //TestHF_1();
-  //TestHF_2();
   EVNT_SetEvent(EVNT_STARTUP);
-  for(;;) {
-//    CLS1_SendStr("Hello World!\r\n", CLS1_GetStdio()->stdOut);
-   // TestCS();
- //   LED1_On();
-  //  LED2_On();
-    __asm volatile("nop");
-    //LED2_Off();
-    //LED1_Off();
-#if PL_CONFIG_HAS_DEBOUNCE
-    KEYDBNC_Process();
-#else
-    KEY_Scan(); /* scan keys and set events */
-#endif
-    WAIT1_WaitOSms(50);
-    EVNT_HandleEvent(APP_EventHandler, TRUE);
-  }
+
+  BaseType_t res;
+  xTaskHandle taskHandleBlinky;
+  res = xTaskCreate(BlinkyTask,
+  	  	  "Blinky",
+		  configMINIMAL_STACK_SIZE + 50,
+		  (void*)NULL,
+		  tskIDLE_PRIORITY+1,
+		  &taskHandleBlinky
+		 );
+
+  xTaskHandle taskHandleEvnetHandler;
+  res = xTaskCreate(EventHandler,
+   	  	  "EventHandler",
+ 		  configMINIMAL_STACK_SIZE + 50,
+ 		  (void*)NULL,
+ 		  tskIDLE_PRIORITY+1,
+ 		  &taskHandleEvnetHandler
+ 		 );
 }
 
 

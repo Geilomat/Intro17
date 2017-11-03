@@ -131,7 +131,6 @@ void SW1_OnInterrupt(void)
 ** ===================================================================
 */
 
-#if PL_CONFIG_HAS_RTOS
 void FRTOS1_vApplicationStackOverflowHook(TaskHandle_t pxTask, char *pcTaskName)
 {
   /* This will get called if a stack overflow is detected during the context
@@ -168,7 +167,6 @@ void FRTOS1_vApplicationMallocFailedHook(void)
   /* Write your code here ... */
   for(;;) {}
 }
-#endif
 
 /*
 ** ===================================================================
@@ -204,6 +202,25 @@ void FRTOS1_vApplicationIdleHook(void)
 {
   /* Called whenever the RTOS is idle (from the IDLE task).
      Here would be a good place to put the CPU into low power mode. */
+  /* Write your code here ... */
+}
+
+/*
+** ===================================================================
+**     Event       :  QuadInt_OnInterrupt (module Events)
+**
+**     Component   :  QuadInt [TimerInt]
+**     Description :
+**         When a timer interrupt occurs this event is called (only
+**         when the component is enabled - <Enable> and the events are
+**         enabled - <EnableEvent>). This event is enabled only if a
+**         <interrupt service/event> is enabled.
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+void QuadInt_OnInterrupt(void)
+{
   /* Write your code here ... */
 }
 
