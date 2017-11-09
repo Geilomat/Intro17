@@ -258,7 +258,6 @@ static void APP_AdoptToHardware(void) {
 #endif
 }
 
-
 static void BlinkyTask(void *pvParameters) {
 	TickType_t xLastWakeTime = xTaskGetTickCount();
 	for(;;) {
@@ -287,6 +286,7 @@ void APP_Start(void) {
   APP_AdoptToHardware();
   __asm volatile("cpsid i"); /* disable interrupts */
   __asm volatile("cpsie i"); /* enable interrupts */
+
   EVNT_SetEvent(EVNT_STARTUP);
 
   BaseType_t res;
