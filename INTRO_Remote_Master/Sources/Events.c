@@ -157,7 +157,7 @@ void SW2_OnInterrupt(void)
 */
 void SW1_OnInterrupt(void)
 {
-  KEY_OnInterrupt(KEY_BTN2);
+  KEY_OnInterrupt(KEY_BTN1);
 }
 
 /*

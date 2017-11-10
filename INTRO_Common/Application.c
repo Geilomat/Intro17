@@ -102,6 +102,9 @@ void APP_EventHandler(EVNT_Handle event) {
 #if PL_CONFIG_NOF_KEYS>=1
   case EVNT_SW1_PRESSED:
      BtnMsg(1, "pressed");
+#if PL_CONFIG_BOARD_IS_ROBO
+     LED_Neg(2);
+#endif
      break;
   case EVNT_SW1_LPRESSED:
      BtnMsg(1, "long pressed");
@@ -271,13 +274,13 @@ static void EventHandler(void* pvParameters) {
 	for(;;) {
 
 #if PL_CONFIG_HAS_DEBOUNCE
-		KEYDBNC_Process();
+	KEYDBNC_Process();
 #else
-	    KEY_Scan(); /* scan keys and set events */
+	KEY_Scan(); /* scan keys and set events */
 #endif
 
-		EVNT_HandleEvent(APP_EventHandler, TRUE);
-		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(50));
+	EVNT_HandleEvent(APP_EventHandler, TRUE);
+	vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(50));
 	}
 }
 
@@ -298,15 +301,21 @@ void APP_Start(void) {
 		  tskIDLE_PRIORITY+1,
 		  &taskHandleBlinky
 		 );
+  if(res != pdPASS) {
+	  for(;;) {} // shiit
+  };
 
   xTaskHandle taskHandleEvnetHandler;
   res = xTaskCreate(EventHandler,
    	  	  "EventHandler",
- 		  configMINIMAL_STACK_SIZE + 50,
+ 		  configMINIMAL_STACK_SIZE + 100,
  		  (void*)NULL,
  		  tskIDLE_PRIORITY+1,
  		  &taskHandleEvnetHandler
  		 );
+  if(res != pdPASS) {
+	  for(;;) {} // shiit
+  };
 }
 
 
