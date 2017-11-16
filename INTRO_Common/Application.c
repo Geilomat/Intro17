@@ -293,6 +293,8 @@ void APP_Start(void) {
   EVNT_SetEvent(EVNT_STARTUP);
 
   BaseType_t res;
+
+/**
   xTaskHandle taskHandleBlinky;
   res = xTaskCreate(BlinkyTask,
   	  	  "Blinky",
@@ -304,6 +306,7 @@ void APP_Start(void) {
   if(res != pdPASS) {
 	  for(;;) {} // shiit
   };
+**/
 
   xTaskHandle taskHandleEvnetHandler;
   res = xTaskCreate(EventHandler,

@@ -23,11 +23,17 @@
 static xSemaphoreHandle sem = NULL;
 
 static void vSlaveTask(void *pvParameters) {
-  /*! \todo Implement functionality */
+	for(;;) {
+		xSemaphoreTake(sem, portMAX_DELAY);
+		LED_Neg(1);
+	}
 }
 
 static void vMasterTask(void *pvParameters) {
-  /*! \todo send semaphore from master task to slave task */
+	for(;;) {
+		xSemaphoreGive(sem);
+		vTaskDelay(pdMS_TO_TICKS(1000));
+	}
 }
 
 void SEM_Deinit(void) {
@@ -35,5 +41,32 @@ void SEM_Deinit(void) {
 
 /*! \brief Initializes module */
 void SEM_Init(void) {
+	BaseType_t res;
+
+	xTaskHandle taskHandleSlave;
+	res = xTaskCreate(vSlaveTask,
+		  "SemaphoreSlave",
+		  configMINIMAL_STACK_SIZE + 50,
+		  (void*)NULL,
+		  tskIDLE_PRIORITY+1,
+		  &taskHandleSlave
+		 );
+	if(res != pdPASS) {
+	  for(;;) {} // shiit
+	};
+
+	xTaskHandle taskHandleMaster;
+	res = xTaskCreate(vMasterTask,
+		  "SemaphoreMaster",
+		  configMINIMAL_STACK_SIZE + 50,
+		  (void*)NULL,
+		  tskIDLE_PRIORITY+1,
+		  &taskHandleMaster
+		 );
+	if(res != pdPASS) {
+	  for(;;) {} // shiit
+	};
+
+	sem = xSemaphoreCreateBinary();
 }
 #endif /* PL_CONFIG_HAS_SEMAPHORE */
