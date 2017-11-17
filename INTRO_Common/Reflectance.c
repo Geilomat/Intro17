@@ -30,6 +30,8 @@
   #include "NVM_Config.h"
 #endif
 
+#define MEASURE_TIMEOUT		  10 /* [ms] */
+
 #define REF_NOF_SENSORS       6 /* number of sensors */
 #define REF_SENSOR1_IS_LEFT   1 /* sensor number one is on the left side */
 #define REF_MIN_NOISE_VAL     0x40   /* values below this are not added to the weighted sum */
@@ -51,6 +53,7 @@ typedef enum {
 static volatile RefStateType refState = REF_STATE_INIT; /* state machine state */
 
 static LDD_TDeviceData *timerHandle;
+static uint32_t timerTimeoutTicks;
 
 typedef struct SensorFctType_ {
   void (*SetOutput)(void);
@@ -142,15 +145,16 @@ static void REF_MeasureRaw(SensorTimeType raw[REF_NOF_SENSORS]) {
   RefCnt_TValueType timerVal;
   /*! \todo Consider reentrancy and mutual exclusion! */
 
+
   LED_IR_On(); /* IR LED's on */
   WAIT1_Waitus(200);
-  taskENTER_CRITICAL();
   for(i=0;i<REF_NOF_SENSORS;i++) {
     SensorFctArray[i].SetOutput(); /* turn I/O line as output */
     SensorFctArray[i].SetVal(); /* put high */
     raw[i] = MAX_SENSOR_VALUE;
   }
   WAIT1_Waitus(50); /* give at least 10 us to charge the capacitor */
+  taskENTER_CRITICAL();
   for(i=0;i<REF_NOF_SENSORS;i++) {
     SensorFctArray[i].SetInput(); /* turn I/O line as input */
   }
@@ -167,6 +171,9 @@ static void REF_MeasureRaw(SensorTimeType raw[REF_NOF_SENSORS]) {
         cnt++;
       }
     }
+    if(timerVal >= timerTimeoutTicks) {
+    	break;
+    }
   } while(cnt!=REF_NOF_SENSORS);
   taskEXIT_CRITICAL();
   LED_IR_Off(); /* IR LED's off */
@@ -177,12 +184,14 @@ static void REF_CalibrateMinMax(SensorTimeType min[REF_NOF_SENSORS], SensorTimeT
   
   REF_MeasureRaw(raw);
   for(i=0;i<REF_NOF_SENSORS;i++) {
-    if (raw[i] < min[i]) {
-      min[i] = raw[i];
-    }
-    if (raw[i]> max[i]) {
-      max[i] = raw[i];
-    }
+	  if(raw[i] != MAX_SENSOR_VALUE) {
+		  if (raw[i] < min[i]) {
+			min[i] = raw[i];
+		  }
+		  if (raw[i]> max[i]) {
+			max[i] = raw[i];
+		  }
+	  }
   }
 }
 
@@ -595,6 +604,7 @@ void REF_Init(void) {
 
   refState = REF_STATE_INIT;
   timerHandle = RefCnt_Init(NULL);
+  timerTimeoutTicks = (MEASURE_TIMEOUT*RefCnt_GetInputFrequency(timerHandle))/1000;
   /*! \todo You might need to adjust priority or other task settings */
   if (xTaskCreate(ReflTask, "Refl", 600/sizeof(StackType_t), NULL, tskIDLE_PRIORITY, NULL) != pdPASS) {
     for(;;){} /* error */
