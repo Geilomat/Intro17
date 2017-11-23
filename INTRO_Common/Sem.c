@@ -41,6 +41,8 @@ void SEM_Deinit(void) {
 
 /*! \brief Initializes module */
 void SEM_Init(void) {
+
+#if 0
 	BaseType_t res;
 
 	xTaskHandle taskHandleSlave;
@@ -68,5 +70,6 @@ void SEM_Init(void) {
 	};
 
 	sem = xSemaphoreCreateBinary();
+#endif
 }
 #endif /* PL_CONFIG_HAS_SEMAPHORE */

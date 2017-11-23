@@ -281,6 +281,13 @@ static void APP_AdoptToHardware(void) {
 #endif
 }
 
+static void Blinky(void* pvParameters) {
+	TickType_t xLastWakeTime = xTaskGetTickCount();
+	for(;;) {
+		LED1_Neg();
+		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(500));
+	}
+}
 
 static void EventHandler(void* pvParameters) {
 	TickType_t xLastWakeTime = xTaskGetTickCount();
@@ -305,6 +312,8 @@ static void DriveController(void* PcParameters){
 	DRIVER_STATE state = SETUP;
 	TickType_t xLastWakeTime = xTaskGetTickCount();
 
+#define SPEED 25
+
 	while(!0){
 		switch (state){
 		case SETUP: if(REF_IsReady()){
@@ -318,14 +327,14 @@ static void DriveController(void* PcParameters){
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
 					for(int i = 0; i < 6; i++){
-						if(refValues[i] > 600){
+						if(refValues[i] > 200){
 							counter ++;
 						}
 					}
 					if(counter > 5){
 						//set Motor to drive
-						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 25);
-						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 25);
+						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
+						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
 						state = DRIVE;
 					}
 			break;
@@ -344,11 +353,11 @@ static void DriveController(void* PcParameters){
 					}
 			break;
 
-		case TURN:	MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), -25);
-					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 25);
+		case TURN:	MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), -SPEED);
+					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
 					vTaskDelay(pdMS_TO_TICKS(700));
-					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 25);
-					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 25);
+					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
+					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
 					state = DRIVE;
 			break;
 
@@ -371,6 +380,18 @@ void APP_Start(void) {
 
   BaseType_t res;
 
+
+  xTaskHandle taskHandleBlinky;
+  res = xTaskCreate(Blinky,
+   	  	  "Blinky",
+ 		  configMINIMAL_STACK_SIZE + 50,
+ 		  (void*)NULL,
+ 		  tskIDLE_PRIORITY+1,
+ 		  &taskHandleBlinky
+ 		 );
+  if(res != pdPASS) {
+	  for(;;) {} // shiit
+  };
 
   xTaskHandle taskHandleEvnetHandler;
   res = xTaskCreate(EventHandler,

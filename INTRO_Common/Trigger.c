@@ -41,7 +41,7 @@ static bool CheckCallbacks(void) {
   TRG_Callback callback;
   TRG_CallBackDataPtr data;
   bool calledCallBack = FALSE;
-  CS1_CriticalVariable()
+  CS1_CriticalVariable();
 
   for(i=(TRG_TriggerKind)0;i<TRG_NOF_TRIGGERS;i++) {
     CS1_EnterCritical();
