@@ -235,7 +235,7 @@ static void APP_AdoptToHardware(void) {
   } else if (KIN1_UIDSame(&id, &RoboIDs[5])) { /* L5, V2 */
     MOT_Invert(MOT_GetMotorHandle(MOT_MOTOR_LEFT), TRUE); /* invert right motor */
 #if PL_CONFIG_HAS_QUADRATURE
-    (void)Q4CRight_SwapPins(TRUE);
+    (void)Q4CLeft_SwapPins(TRUE);
 #endif
   } else if (KIN1_UIDSame(&id, &RoboIDs[6])) { /* L3, V1 */
     MOT_Invert(MOT_GetMotorHandle(MOT_MOTOR_LEFT), TRUE); /* invert right motor */
@@ -251,6 +251,9 @@ static void APP_AdoptToHardware(void) {
 #endif
   } else if (KIN1_UIDSame(&id, &RoboIDs[8])) { /* L6, V1 */
 	MOT_Invert(MOT_GetMotorHandle(MOT_MOTOR_LEFT), TRUE);
+#if PL_CONFIG_HAS_QUADRATURE
+    (void)Q4CLeft_SwapPins(TRUE);
+#endif
   }
 #endif
 #if PL_CONFIG_HAS_QUADRATURE && PL_CONFIG_BOARD_IS_ROBO_V2
@@ -266,13 +269,6 @@ static void APP_AdoptToHardware(void) {
 #endif
 }
 
-static void BlinkyTask(void *pvParameters) {
-	TickType_t xLastWakeTime = xTaskGetTickCount();
-	for(;;) {
-		LED_Neg(1);
-		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(500));
-	}
-}
 
 static void EventHandler(void* pvParameters) {
 	TickType_t xLastWakeTime = xTaskGetTickCount();
@@ -285,7 +281,7 @@ static void EventHandler(void* pvParameters) {
 #endif
 
 	EVNT_HandleEvent(APP_EventHandler, TRUE);
-	vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(50));
+	vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(100));
 	}
 }
 
@@ -299,19 +295,6 @@ void APP_Start(void) {
 
   BaseType_t res;
 
-/**
-  xTaskHandle taskHandleBlinky;
-  res = xTaskCreate(BlinkyTask,
-  	  	  "Blinky",
-		  configMINIMAL_STACK_SIZE + 50,
-		  (void*)NULL,
-		  tskIDLE_PRIORITY+1,
-		  &taskHandleBlinky
-		 );
-  if(res != pdPASS) {
-	  for(;;) {} // shiit
-  };
-**/
 
   xTaskHandle taskHandleEvnetHandler;
   res = xTaskCreate(EventHandler,

@@ -96,6 +96,8 @@
 #include "MCUC1.h"
 #include "ADC_Bat.h"
 #include "TmDt1.h"
+#include "I2C1.h"
+#include "GI2C1.h"
 #include "IFsh1.h"
 #include "IntFlashLdd1.h"
 #include "PTRC1.h"
