@@ -54,6 +54,14 @@
 #endif
 #include "Sumo.h"
 
+typedef enum {
+		SETUP,
+		INIT,
+		DRIVE,
+		TURN,
+		STOP
+}DRIVER_STATE;
+
 #if PL_CONFIG_HAS_EVENTS
 
 static void BtnMsg(int btn, const char *msg) {
@@ -91,9 +99,7 @@ void APP_EventHandler(EVNT_Handle event) {
         WAIT1_Waitms(50);
       }
       LED1_Off();
-#if PL_CONFIG_HAS_BUZZER
-      BUZ_PlayTune(BUZ_TUNE_WELCOME);
-#endif
+
     }
     break;
   case EVNT_LED_HEARTBEAT:
@@ -103,11 +109,17 @@ void APP_EventHandler(EVNT_Handle event) {
   case EVNT_SW1_PRESSED:
      BtnMsg(1, "pressed");
 #if PL_CONFIG_BOARD_IS_ROBO
-     LED_Neg(2);
 #endif
      break;
   case EVNT_SW1_LPRESSED:
      BtnMsg(1, "long pressed");
+#if PL_CONFIG_BOARD_IS_ROBO
+     REF_CalibrateStartStop();
+     LED_Neg(2);
+#endif
+#if PL_CONFIG_HAS_BUZZER
+
+#endif
      break;
   case EVNT_SW1_RELEASED:
      BtnMsg(1, "released");
@@ -285,6 +297,70 @@ static void EventHandler(void* pvParameters) {
 	}
 }
 
+#if PL_CONFIG_BOARD_IS_ROBO
+
+static void DriveController(void* PcParameters){
+	uint16_t refValues[REF_NOF_SENSORS];
+	int counter = 0;
+	DRIVER_STATE state = SETUP;
+	TickType_t xLastWakeTime = xTaskGetTickCount();
+
+	while(!0){
+		switch (state){
+		case SETUP: if(REF_IsReady()){
+						state = INIT;
+						vTaskDelay(pdMS_TO_TICKS(2000));
+					}
+			break;
+
+		case INIT:	REF_GetSensorValues(refValues, 6);
+					counter = 0;
+					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
+					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+					for(int i = 0; i < 6; i++){
+						if(refValues[i] > 600){
+							counter ++;
+						}
+					}
+					if(counter > 5){
+						//set Motor to drive
+						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 25);
+						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 25);
+						state = DRIVE;
+					}
+			break;
+
+		case DRIVE:	REF_GetSensorValues(refValues, 6);
+					counter = 0;
+					for(int i = 0; i < 6; i++){
+						if(refValues[i] < 100 ){
+							counter ++;
+						}
+					}
+					if(counter > 1){
+						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
+						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+						state = TURN;
+					}
+			break;
+
+		case TURN:	MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), -25);
+					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 25);
+					vTaskDelay(pdMS_TO_TICKS(700));
+					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 25);
+					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 25);
+					state = DRIVE;
+			break;
+
+		case STOP: 	MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
+					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+		}
+		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(50));
+	}
+}
+
+#endif
+
 void APP_Start(void) {
   PL_Init();
   APP_AdoptToHardware();
@@ -307,6 +383,20 @@ void APP_Start(void) {
   if(res != pdPASS) {
 	  for(;;) {} // shiit
   };
+
+#if PL_CONFIG_BOARD_IS_ROBO
+  xTaskHandle taskHandleDriveController;
+  res = xTaskCreate(DriveController,
+   	  	  "DriveController",
+ 		  configMINIMAL_STACK_SIZE + 100,
+ 		  (void*)NULL,
+ 		  tskIDLE_PRIORITY+1,
+ 		  &taskHandleDriveController
+ 		 );
+  if(res != pdPASS) {
+	  for(;;) {} // shiit
+  };
+#endif
 }
 
 
