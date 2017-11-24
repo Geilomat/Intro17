@@ -97,7 +97,6 @@ void PTRC1_OnTraceWrap(void)
 void TI1_OnInterrupt(void)
 {
   TMR_OnInterrupt();
-  TACHO_Sample();
 }
 
 /*
@@ -160,6 +159,7 @@ void FRTOS1_vApplicationStackOverflowHook(TaskHandle_t pxTask, char *pcTaskName)
 void FRTOS1_vApplicationTickHook(void)
 {
   /* Called for every RTOS tick. */
+  TACHO_Sample();
 }
 
 /*
