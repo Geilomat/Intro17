@@ -62,6 +62,20 @@ typedef enum {
 		STOP
 }DRIVER_STATE;
 
+static xSemaphoreHandle btn1Sem = NULL;
+
+#if PL_CONFIG_BOARD_IS_ROBO
+static void Btn1Pressed(void){
+	if(REF_IsReady()){
+		xSemaphoreGive(btn1Sem);
+	}
+	else{
+		REF_CalibrateStartStop();
+		LED_Neg(2);
+	}
+}
+#endif
+
 #if PL_CONFIG_HAS_EVENTS
 
 static void BtnMsg(int btn, const char *msg) {
@@ -109,14 +123,14 @@ void APP_EventHandler(EVNT_Handle event) {
   case EVNT_SW1_PRESSED:
      BtnMsg(1, "pressed");
 #if PL_CONFIG_BOARD_IS_ROBO
+     Btn1Pressed();
+#endif
+#if PL_CONFIG_BOARD_IS_ROBO
 #endif
      break;
   case EVNT_SW1_LPRESSED:
      BtnMsg(1, "long pressed");
-#if PL_CONFIG_BOARD_IS_ROBO
-     REF_CalibrateStartStop();
-     LED_Neg(2);
-#endif
+
 #if PL_CONFIG_HAS_BUZZER
 
 #endif
@@ -281,6 +295,9 @@ static void APP_AdoptToHardware(void) {
 #endif
 }
 
+
+
+
 static void Blinky(void* pvParameters) {
 	TickType_t xLastWakeTime = xTaskGetTickCount();
 	for(;;) {
@@ -307,8 +324,8 @@ static void EventHandler(void* pvParameters) {
 #if PL_CONFIG_BOARD_IS_ROBO
 
 static void DriveController(void* PcParameters){
-	uint16_t refValues[REF_NOF_SENSORS];
-	int counter = 0;
+	//uint16_t refValues[REF_NOF_SENSORS];
+	//int counter = 0;
 	DRIVER_STATE state = SETUP;
 	TickType_t xLastWakeTime = xTaskGetTickCount();
 
@@ -316,37 +333,24 @@ static void DriveController(void* PcParameters){
 
 	while(!0){
 		switch (state){
-		case SETUP: if(REF_IsReady()){
+		case SETUP: if(xSemaphoreTake(btn1Sem, 0)){
 						state = INIT;
-						vTaskDelay(pdMS_TO_TICKS(2000));
+						//vTaskDelay(pdMS_TO_TICKS(2000));
 					}
 			break;
 
-		case INIT:	REF_GetSensorValues(refValues, 6);
-					counter = 0;
+		case INIT:
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
-					for(int i = 0; i < 6; i++){
-						if(refValues[i] > 200){
-							counter ++;
-						}
-					}
-					if(counter > 5){
-						//set Motor to drive
+
+					if(REF_GetLineKind()==  REF_LINE_FULL){
 						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
 						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
 						state = DRIVE;
 					}
 			break;
 
-		case DRIVE:	REF_GetSensorValues(refValues, 6);
-					counter = 0;
-					for(int i = 0; i < 6; i++){
-						if(refValues[i] < 100 ){
-							counter ++;
-						}
-					}
-					if(counter > 1){
+		case DRIVE:	if(REF_GetLineKind() !=  REF_LINE_FULL){
 						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
 						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
 						state = TURN;
@@ -354,11 +358,13 @@ static void DriveController(void* PcParameters){
 			break;
 
 		case TURN:	MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), -SPEED);
-					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
-					vTaskDelay(pdMS_TO_TICKS(700));
+					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+					vTaskDelay(pdMS_TO_TICKS(100));
+					if(REF_GetLineKind() == REF_LINE_FULL){
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
 					state = DRIVE;
+					}
 			break;
 
 		case STOP: 	MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
@@ -417,6 +423,10 @@ void APP_Start(void) {
   if(res != pdPASS) {
 	  for(;;) {} // shiit
   };
+
+  btn1Sem = xSemaphoreCreateBinary();
+
+
 #endif
 }
 
