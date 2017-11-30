@@ -30,7 +30,7 @@
   #include "NVM_Config.h"
 #endif
 
-#define MEASURE_TIMEOUT		  10 /* [ms] */
+#define MEASURE_TIMEOUT		  5 /* [ms] */
 
 #define REF_NOF_SENSORS       6 /* number of sensors */
 #define REF_SENSOR1_IS_LEFT   1 /* sensor number one is on the left side */

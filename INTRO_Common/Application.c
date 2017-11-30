@@ -344,14 +344,11 @@ static void DriveController(void* PcParameters){
 		switch (state){
 		case SETUP: if(xSemaphoreTake(btn1Sem, 0)){
 						state = INIT;
-						//vTaskDelay(pdMS_TO_TICKS(2000));
+						vTaskDelay(pdMS_TO_TICKS(1000));
 					}
 			break;
 
 		case INIT:
-					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
-					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
-
 					if(REF_GetLineKind()==  REF_LINE_FULL){
 						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
 						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
@@ -360,8 +357,17 @@ static void DriveController(void* PcParameters){
 			break;
 
 		case DRIVE:	if(REF_GetLineKind() !=  REF_LINE_FULL){
-						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
-						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+						uint16_t refValues[REF_NOF_SENSORS];
+						REF_GetSensorValues(refValues, REF_NOF_SENSORS);
+						if(refValues[0] < 300) {
+							// backup to the right
+							MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), -100);
+							MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 10);
+						} else {
+							// back up to the right
+							MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 10);
+							MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), -100);
+						}
 						state = TURN;
 					}
 					if(xSemaphoreTake(btn1Sem, 0)){
@@ -369,9 +375,7 @@ static void DriveController(void* PcParameters){
 					}
 			break;
 
-		case TURN:	MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), -SPEED);
-					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
-					vTaskDelay(pdMS_TO_TICKS(100));
+		case TURN:  vTaskDelay(pdMS_TO_TICKS(50));
 					if(REF_GetLineKind() == REF_LINE_FULL){
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
@@ -438,7 +442,7 @@ void APP_Start(void) {
   }
 
   btn1Sem = xSemaphoreCreateBinary();
-  if(btn1Sem != pdPASS){
+  if(btn1Sem == NULL){
 	  while(!0){} // uuuups !
   }
 
