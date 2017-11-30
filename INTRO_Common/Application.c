@@ -375,8 +375,8 @@ static void DriveController(void* PcParameters){
 					}
 			break;
 
-		case TURN:  vTaskDelay(pdMS_TO_TICKS(50));
-					if(REF_GetLineKind() == REF_LINE_FULL){
+		case TURN:  if(REF_GetLineKind() == REF_LINE_FULL){
+					vTaskDelay(pdMS_TO_TICKS(500));
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
 					state = DRIVE;
@@ -387,7 +387,7 @@ static void DriveController(void* PcParameters){
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
 					state = INIT;
 		}
-		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(50));
+		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));
 	}
 }
 
