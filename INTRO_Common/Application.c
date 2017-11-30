@@ -302,7 +302,16 @@ static void Blinky(void* pvParameters) {
 	TickType_t xLastWakeTime = xTaskGetTickCount();
 	for(;;) {
 		LED1_Neg();
+#if PL_CONFIG_BOARD_IS_ROBO
+		if(REF_IsReady()){
+			vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(250));
+		}
+		else{
+			vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(500));
+		}
+#else
 		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(500));
+#endif
 	}
 }
 
@@ -329,7 +338,7 @@ static void DriveController(void* PcParameters){
 	DRIVER_STATE state = SETUP;
 	TickType_t xLastWakeTime = xTaskGetTickCount();
 
-#define SPEED 25
+#define SPEED 60
 
 	while(!0){
 		switch (state){
@@ -355,6 +364,9 @@ static void DriveController(void* PcParameters){
 						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
 						state = TURN;
 					}
+					if(xSemaphoreTake(btn1Sem, 0)){
+						state = STOP;
+					}
 			break;
 
 		case TURN:	MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), -SPEED);
@@ -369,6 +381,7 @@ static void DriveController(void* PcParameters){
 
 		case STOP: 	MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+					state = INIT;
 		}
 		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(50));
 	}
@@ -397,7 +410,7 @@ void APP_Start(void) {
  		 );
   if(res != pdPASS) {
 	  for(;;) {} // shiit
-  };
+  }
 
   xTaskHandle taskHandleEvnetHandler;
   res = xTaskCreate(EventHandler,
@@ -409,7 +422,7 @@ void APP_Start(void) {
  		 );
   if(res != pdPASS) {
 	  for(;;) {} // shiit
-  };
+  }
 
 #if PL_CONFIG_BOARD_IS_ROBO
   xTaskHandle taskHandleDriveController;
@@ -422,9 +435,12 @@ void APP_Start(void) {
  		 );
   if(res != pdPASS) {
 	  for(;;) {} // shiit
-  };
+  }
 
   btn1Sem = xSemaphoreCreateBinary();
+  if(btn1Sem != pdPASS){
+	  while(!0){} // uuuups !
+  }
 
 
 #endif
