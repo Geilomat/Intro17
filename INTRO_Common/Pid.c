@@ -57,9 +57,9 @@ static int32_t PID(int32_t currVal, int32_t setVal, PID_Config *config) {
   error = setVal-currVal; /* calculate error */
   pid = (error*config->pFactor100)/100; /* P part */
   config->integral += error; /* integrate error */
-  if (config->integral>config->iAntiWindup) {
+  if (config->integral > config->iAntiWindup) {
     config->integral = config->iAntiWindup;
-  } else if (config->integral<-config->iAntiWindup) {
+  } else if (config->integral < -config->iAntiWindup) {
     config->integral = -config->iAntiWindup;
   }
   pid += (config->integral*config->iFactor100)/100; /* add I part */
@@ -415,8 +415,9 @@ uint8_t PID_ParseCommand(const unsigned char *cmd, bool *handled, const CLS1_Std
     res = ParsePidParameter(&config.posRightConfig, cmd+sizeof("pid pos R ")-1, handled, io);
   } else if (UTIL1_strncmp((char*)cmd, (char*)"pid fw ", sizeof("pid fw ")-1)==0) {
     res = ParsePidParameter(&config.lineFwConfig, cmd+sizeof("pid fw ")-1, handled, io);
+  }
 #if PL_CONFIG_HAS_CONFIG_NVM
-  } else if (UTIL1_strcmp((char*)cmd, (char*)"pid store")==0) {
+    else if (UTIL1_strcmp((char*)cmd, (char*)"pid store")==0) {
     *handled = TRUE;
     res = PID_StoreSettingsToFlash();
     if (res!=ERR_OK) {
@@ -455,10 +456,10 @@ void PID_Deinit(void) {
 
 void PID_Init(void) {
   /*! \todo determine your PID values */
-  config.speedLeftConfig.pFactor100 = 0;
-  config.speedLeftConfig.iFactor100 = 0;
-  config.speedLeftConfig.dFactor100 = 0;
-  config.speedLeftConfig.iAntiWindup = 0;
+  config.speedLeftConfig.pFactor100 = 2000;
+  config.speedLeftConfig.iFactor100 = 400;
+  config.speedLeftConfig.dFactor100 = 150;
+  config.speedLeftConfig.iAntiWindup = 10000;
   config.speedLeftConfig.maxSpeedPercent = 0;
   config.speedLeftConfig.lastError = 0;
   config.speedLeftConfig.integral = 0;
