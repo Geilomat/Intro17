@@ -482,8 +482,8 @@ void PID_Init(void) {
   config.posLeftConfig.pFactor100 = 30;
   config.posLeftConfig.iFactor100 = 0;
   config.posLeftConfig.dFactor100 = 300;
-  config.posLeftConfig.iAntiWindup = 10000;
-  config.posLeftConfig.maxSpeedPercent = 20;
+  config.posLeftConfig.iAntiWindup = 0;
+  config.posLeftConfig.maxSpeedPercent = 100;
   config.posLeftConfig.lastError = 0;
   config.posLeftConfig.integral = 0;
   config.posRightConfig.pFactor100 = config.posLeftConfig.pFactor100;

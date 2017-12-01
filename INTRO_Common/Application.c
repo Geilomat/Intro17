@@ -52,6 +52,9 @@
 #if PL_CONFIG_HAS_REFLECTANCE
   #include "Reflectance.h"
 #endif
+#if PL_CONFIG_HAS_DRIVE
+  #include "Drive.h"
+#endif
 #include "Sumo.h"
 
 typedef enum {
@@ -332,7 +335,7 @@ static void EventHandler(void* pvParameters) {
 
 #if PL_CONFIG_BOARD_IS_ROBO
 
-static void DriveController(void* PcParameters){
+static void PrimitiveFight(void* PcParameters){
 	//uint16_t refValues[REF_NOF_SENSORS];
 	//int counter = 0;
 	DRIVER_STATE state = SETUP;
@@ -393,6 +396,10 @@ static void DriveController(void* PcParameters){
 
 #endif
 
+static void PositionPID(void* PcParameters) {
+
+}
+
 void APP_Start(void) {
   PL_Init();
   APP_AdoptToHardware();
@@ -429,13 +436,13 @@ void APP_Start(void) {
   }
 
 #if PL_CONFIG_BOARD_IS_ROBO
-  xTaskHandle taskHandleDriveController;
-  res = xTaskCreate(DriveController,
-   	  	  "DriveController",
+  xTaskHandle taskHandlePrimitiveFight;
+  res = xTaskCreate(PrimitiveFight,
+   	  	  "PrimitiveFight",
  		  configMINIMAL_STACK_SIZE + 100,
  		  (void*)NULL,
  		  tskIDLE_PRIORITY+1,
- 		  &taskHandleDriveController
+ 		  &taskHandlePrimitiveFight
  		 );
   if(res != pdPASS) {
 	  for(;;) {} // shiit
