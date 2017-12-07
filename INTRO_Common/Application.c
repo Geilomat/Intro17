@@ -60,7 +60,7 @@
 #endif
 #include "Sumo.h"
 
-#define PROGRAM_MODE 1 				// 0 = None, 1 = Primitive sumofighter , 2 = RealSumo, 3= Line following
+#define PROGRAM_MODE 3 				// 0 = None, 1 = Primitive sumofighter , 2 = RealSumo, 3= Line following
 
 #if PL_CONFIG_BOARD_IS_ROBO
 
@@ -417,6 +417,62 @@ static void PrimitiveFight(void* PcParameters){
 
 		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));
 	}
+}
+
+
+static void LineFollowing(void* pvParameters) {
+  TickType_t xLastWakeTime = xTaskGetTickCount();
+  DRIVER_STATE state = SETUP;
+
+  for(;;) {
+      //vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(250));
+    switch(state)
+    {
+      case SETUP:
+        if(xSemaphoreTake(btn1Sem, 0)){
+          if(xSemaphoreTake(btn1LongSem, 600)) {
+            if(REF_CalibrateStart())
+              LED2_On();
+              state = CALIB;
+          } else if(REF_IsReady()) {
+            state = READY;
+          } else {
+            SHELL_SendString("Line Sensors not ready\n");
+          }
+        }
+        break;
+
+
+      case CALIB:
+        if(xSemaphoreTake(btn1Sem, 0)) {
+          if(REF_CalibrateStop())
+            LED2_Off();
+            state = SETUP;
+        }
+        break;
+
+      case READY:
+        if(REF_GetLineKind() != REF_LINE_NONE ){
+          state = DRIVE;
+          LF_StartFollowing();
+        }
+        break;
+
+      case DRIVE:
+        if(REF_GetLineKind() == REF_LINE_NONE){
+          state = SETUP;
+          LF_StopFollowing();
+        }
+
+        break;
+
+      case TURN:
+        break;
+
+
+    }
+
+  }
 }
 #endif
 
