@@ -57,6 +57,12 @@
 #endif
 #include "Sumo.h"
 
+#define PROGRAM_MODE 1 				// 0 = None, 1 = Primitive sumofighter , 2 = RealSumo, 3= Line following
+
+#if PL_CONFIG_BOARD_IS_ROBO
+
+
+
 typedef enum {
 		SETUP,
 		CALIB,
@@ -66,8 +72,12 @@ typedef enum {
 		STOP
 }DRIVER_STATE;
 
+#endif
+
 static xSemaphoreHandle btn1Sem = NULL;
 static xSemaphoreHandle btn1LongSem = NULL;
+
+
 
 #if PL_CONFIG_HAS_EVENTS
 
@@ -395,11 +405,68 @@ static void PrimitiveFight(void* PcParameters){
 	}
 }
 
-#endif
+
 
 static void PositionPID(void* PcParameters) {
 
 }
+
+static void LineFollowing(void* pvParameters) {
+	TickType_t xLastWakeTime = xTaskGetTickCount();
+	DRIVER_STATE state = SETUP;
+
+	for(;;) {
+			//vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(250));
+		switch(state)
+		{
+			case SETUP:
+				if(xSemaphoreTake(btn1Sem, 0)){
+					if(xSemaphoreTake(btn1LongSem, 600)) {
+						if(REF_CalibrateStart())
+							LED2_On();
+							state = CALIB;
+					} else if(REF_IsReady()) {
+						state = READY;
+					} else {
+						SHELL_SendString("Line Sensors not ready\n");
+					}
+				}
+				break;
+
+
+			case CALIB:
+				if(xSemaphoreTake(btn1Sem, 0)) {
+					if(REF_CalibrateStop())
+						LED2_Off();
+						state = SETUP;
+				}
+				break;
+
+			case READY:
+				if(REF_GetLineKind() != REF_LINE_NONE ){
+					state = DRIVE;
+					LF_StartFollowing();
+				}
+				break;
+
+			case DRIVE:
+				if(REF_GetLineKind() == REF_LINE_FULL){
+					state = TURN;
+					LF_StopFollowing();
+				}
+
+				break;
+
+			case TURN:
+				break;
+
+
+		}
+
+	}
+}
+#endif
+
 
 void APP_Start(void) {
   PL_Init();
@@ -436,7 +503,19 @@ void APP_Start(void) {
 	  for(;;) {} // shiit
   }
 
+  btn1Sem = xSemaphoreCreateBinary();
+  if(btn1Sem == NULL){
+  	  while(!0){} // uuuups !
+  }
+
+  btn1LongSem = xSemaphoreCreateBinary();
+  if(btn1LongSem == NULL){
+  	  while(!0){} // uuuups !
+  }
+
 #if PL_CONFIG_BOARD_IS_ROBO
+
+#if PROGRAM_MODE == 1
   xTaskHandle taskHandlePrimitiveFight;
   res = xTaskCreate(PrimitiveFight,
    	  	  "PrimitiveFight",
@@ -449,15 +528,26 @@ void APP_Start(void) {
 	  for(;;) {} // shiit
   }
 
-  btn1Sem = xSemaphoreCreateBinary();
-  if(btn1Sem == NULL){
-	  while(!0){} // uuuups !
-  }
+#endif
 
-  btn1LongSem = xSemaphoreCreateBinary();
-  if(btn1LongSem == NULL){
-	  while(!0){} // uuuups !
+#if PROGRAM_MODE == 2
+
+#endif
+
+#if PROGRAM_MODE == 3
+
+  xTaskHandle taskHandleLineFollowing;
+  res = xTaskCreate(LineFollowing,
+   	  	  "LineFollowing",
+ 		  configMINIMAL_STACK_SIZE + 100,
+ 		  (void*)NULL,
+ 		  tskIDLE_PRIORITY+1,
+ 		  &taskHandleLineFollowing
+ 		 );
+  if(res != pdPASS) {
+	  for(;;) {} // shiit
   }
+#endif
 
 #endif
 }
