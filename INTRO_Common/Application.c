@@ -58,14 +58,11 @@
 #if PL_CONFIG_HAS_TURN
   #include "Turn.h"
 #endif
-
 #include "Sumo.h"
 
 #define PROGRAM_MODE 1 				// 0 = None, 1 = Primitive sumofighter , 2 = RealSumo, 3= Line following
 
 #if PL_CONFIG_BOARD_IS_ROBO
-
-
 
 typedef enum {
 		SETUP,
@@ -360,7 +357,6 @@ static void PrimitiveFight(void* PcParameters){
 			if(xSemaphoreTake(btn1Sem, 0)) {
 				if(REF_CalibrateStop()) {
 					LED2_Off();
-					REF_CalibrateStartStop();
 					state = SETUP;
 				}
 			}
@@ -368,8 +364,8 @@ static void PrimitiveFight(void* PcParameters){
 
 		case READY:
 			if(REF_GetLineKind()==  REF_LINE_FULL){
-				MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
-				MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
+				DRV_SetSpeed(SPEED, SPEED);
+				DRV_SetMode(DRV_MODE_SPEED);
 				state = DRIVE;
 			}
 			break;
@@ -383,8 +379,8 @@ static void PrimitiveFight(void* PcParameters){
 					// backup to the right
 					TURN_Turn(TURN_STEP_BORDER_BW, NULL);
 					TURN_Turn(TURN_RIGHT180, NULL);
-					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
-					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
+					DRV_SetSpeed(SPEED, SPEED);
+					DRV_SetMode(DRV_MODE_SPEED);
 					/*
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), -100);
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 10);
@@ -393,8 +389,8 @@ static void PrimitiveFight(void* PcParameters){
 					// back up to the right
 					TURN_Turn(TURN_STEP_BORDER_BW, NULL);
 					TURN_Turn(TURN_LEFT180, NULL);
-					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
-					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
+					DRV_SetSpeed(SPEED, SPEED);
+					DRV_SetMode(DRV_MODE_SPEED);
 					/*
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 10);
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), -100);
@@ -403,8 +399,7 @@ static void PrimitiveFight(void* PcParameters){
 				//state = TURN;
 			}
 			if(xSemaphoreTake(btn1Sem, 0)){
-				MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
-				MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+				DRV_SetMode(DRV_MODE_STOP);
 				state = SETUP;
 			}
 			break;
@@ -413,8 +408,8 @@ static void PrimitiveFight(void* PcParameters){
 		case TURN:
 			if(REF_GetLineKind() == REF_LINE_FULL){
 				vTaskDelay(pdMS_TO_TICKS(500));
-				MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
-				MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
+				DRV_SetSpeed(SPEED, SPEED);
+				DRV_SetMode(DRV_MODE_SPEED);
 				state = DRIVE;
 				}
 			break;
@@ -485,7 +480,6 @@ void APP_Start(void) {
   if(res != pdPASS) {
 	  for(;;) {} // shiit
   }
-
 #endif
 
 #if PROGRAM_MODE == 2
