@@ -55,6 +55,10 @@
 #if PL_CONFIG_HAS_DRIVE
   #include "Drive.h"
 #endif
+#if PL_CONFIG_HAS_TURN
+  #include "Turn.h"
+#endif
+
 #include "Sumo.h"
 
 #define PROGRAM_MODE 1 				// 0 = None, 1 = Primitive sumofighter , 2 = RealSumo, 3= Line following
@@ -340,9 +344,10 @@ static void PrimitiveFight(void* PcParameters){
 		case SETUP:
 			if(xSemaphoreTake(btn1Sem, 0)){
 				if(xSemaphoreTake(btn1LongSem, 600)) {
-					LED2_On();
-					REF_CalibrateStartStop();
-					state = CALIB;
+					if(REF_CalibrateStart()) {
+						LED2_On();
+						state = CALIB;
+					}
 				} else if(REF_IsReady()) {
 					state = READY;
 				} else {
@@ -353,9 +358,11 @@ static void PrimitiveFight(void* PcParameters){
 
 		case CALIB:
 			if(xSemaphoreTake(btn1Sem, 0)) {
-				LED2_Off();
-				REF_CalibrateStartStop();
-				state = SETUP;
+				if(REF_CalibrateStop()) {
+					LED2_Off();
+					REF_CalibrateStartStop();
+					state = SETUP;
+				}
 			}
 			break;
 
@@ -374,14 +381,26 @@ static void PrimitiveFight(void* PcParameters){
 				REF_GetSensorValues(refValues, REF_NOF_SENSORS);
 				if(refValues[0] < 300) {
 					// backup to the right
+					TURN_Turn(TURN_STEP_BORDER_BW, NULL);
+					TURN_Turn(TURN_RIGHT180, NULL);
+					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
+					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
+					/*
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), -100);
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 10);
+					*/
 				} else {
 					// back up to the right
+					TURN_Turn(TURN_STEP_BORDER_BW, NULL);
+					TURN_Turn(TURN_LEFT180, NULL);
+					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
+					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
+					/*
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 10);
 					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), -100);
+					*/
 				}
-				state = TURN;
+				//state = TURN;
 			}
 			if(xSemaphoreTake(btn1Sem, 0)){
 				MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
@@ -402,67 +421,6 @@ static void PrimitiveFight(void* PcParameters){
 		}
 
 		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));
-	}
-}
-
-
-
-static void PositionPID(void* PcParameters) {
-
-}
-
-static void LineFollowing(void* pvParameters) {
-	TickType_t xLastWakeTime = xTaskGetTickCount();
-	DRIVER_STATE state = SETUP;
-
-	for(;;) {
-			//vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(250));
-		switch(state)
-		{
-			case SETUP:
-				if(xSemaphoreTake(btn1Sem, 0)){
-					if(xSemaphoreTake(btn1LongSem, 600)) {
-						if(REF_CalibrateStart())
-							LED2_On();
-							state = CALIB;
-					} else if(REF_IsReady()) {
-						state = READY;
-					} else {
-						SHELL_SendString("Line Sensors not ready\n");
-					}
-				}
-				break;
-
-
-			case CALIB:
-				if(xSemaphoreTake(btn1Sem, 0)) {
-					if(REF_CalibrateStop())
-						LED2_Off();
-						state = SETUP;
-				}
-				break;
-
-			case READY:
-				if(REF_GetLineKind() != REF_LINE_NONE ){
-					state = DRIVE;
-					LF_StartFollowing();
-				}
-				break;
-
-			case DRIVE:
-				if(REF_GetLineKind() == REF_LINE_FULL){
-					state = TURN;
-					LF_StopFollowing();
-				}
-
-				break;
-
-			case TURN:
-				break;
-
-
-		}
-
 	}
 }
 #endif
