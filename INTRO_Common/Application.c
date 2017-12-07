@@ -59,25 +59,15 @@
 
 typedef enum {
 		SETUP,
-		INIT,
+		CALIB,
+		READY,
 		DRIVE,
 		TURN,
 		STOP
 }DRIVER_STATE;
 
 static xSemaphoreHandle btn1Sem = NULL;
-
-#if PL_CONFIG_BOARD_IS_ROBO
-static void Btn1Pressed(void){
-	if(REF_IsReady()){
-		xSemaphoreGive(btn1Sem);
-	}
-	else{
-		REF_CalibrateStartStop();
-		LED_Neg(2);
-	}
-}
-#endif
+static xSemaphoreHandle btn1LongSem = NULL;
 
 #if PL_CONFIG_HAS_EVENTS
 
@@ -116,7 +106,6 @@ void APP_EventHandler(EVNT_Handle event) {
         WAIT1_Waitms(50);
       }
       LED1_Off();
-
     }
     break;
   case EVNT_LED_HEARTBEAT:
@@ -124,19 +113,12 @@ void APP_EventHandler(EVNT_Handle event) {
     break;
 #if PL_CONFIG_NOF_KEYS>=1
   case EVNT_SW1_PRESSED:
+	 xSemaphoreGive(btn1Sem);
      BtnMsg(1, "pressed");
-#if PL_CONFIG_BOARD_IS_ROBO
-     Btn1Pressed();
-#endif
-#if PL_CONFIG_BOARD_IS_ROBO
-#endif
      break;
   case EVNT_SW1_LPRESSED:
+	 xSemaphoreGive(btn1LongSem);
      BtnMsg(1, "long pressed");
-
-#if PL_CONFIG_HAS_BUZZER
-
-#endif
      break;
   case EVNT_SW1_RELEASED:
      BtnMsg(1, "released");
@@ -341,55 +323,74 @@ static void PrimitiveFight(void* PcParameters){
 	DRIVER_STATE state = SETUP;
 	TickType_t xLastWakeTime = xTaskGetTickCount();
 
-#define SPEED 60
+#define SPEED 25
 
 	while(!0){
 		switch (state){
-		case SETUP: if(xSemaphoreTake(btn1Sem, 0)){
-						state = INIT;
-						vTaskDelay(pdMS_TO_TICKS(1000));
-					}
+		case SETUP:
+			if(xSemaphoreTake(btn1Sem, 0)){
+				if(xSemaphoreTake(btn1LongSem, 600)) {
+					LED2_On();
+					REF_CalibrateStartStop();
+					state = CALIB;
+				} else if(REF_IsReady()) {
+					state = READY;
+				} else {
+					SHELL_SendString("Line Sensors not ready\n");
+				}
+			}
 			break;
 
-		case INIT:
-					if(REF_GetLineKind()==  REF_LINE_FULL){
-						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
-						MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
-						state = DRIVE;
-					}
+		case CALIB:
+			if(xSemaphoreTake(btn1Sem, 0)) {
+				LED2_Off();
+				REF_CalibrateStartStop();
+				state = SETUP;
+			}
 			break;
 
-		case DRIVE:	if(REF_GetLineKind() !=  REF_LINE_FULL){
-						uint16_t refValues[REF_NOF_SENSORS];
-						REF_GetSensorValues(refValues, REF_NOF_SENSORS);
-						if(refValues[0] < 300) {
-							// backup to the right
-							MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), -100);
-							MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 10);
-						} else {
-							// back up to the right
-							MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 10);
-							MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), -100);
-						}
-						state = TURN;
-					}
-					if(xSemaphoreTake(btn1Sem, 0)){
-						state = STOP;
-					}
+		case READY:
+			if(REF_GetLineKind()==  REF_LINE_FULL){
+				MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
+				MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
+				state = DRIVE;
+			}
 			break;
 
-		case TURN:  if(REF_GetLineKind() == REF_LINE_FULL){
-					vTaskDelay(pdMS_TO_TICKS(500));
-					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
-					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
-					state = DRIVE;
-					}
+
+		case DRIVE:
+			if(REF_GetLineKind() !=  REF_LINE_FULL){
+				uint16_t refValues[REF_NOF_SENSORS];
+				REF_GetSensorValues(refValues, REF_NOF_SENSORS);
+				if(refValues[0] < 300) {
+					// backup to the right
+					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), -100);
+					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 10);
+				} else {
+					// back up to the right
+					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 10);
+					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), -100);
+				}
+				state = TURN;
+			}
+			if(xSemaphoreTake(btn1Sem, 0)){
+				MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
+				MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+				state = SETUP;
+			}
 			break;
 
-		case STOP: 	MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
-					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
-					state = INIT;
+
+		case TURN:
+			if(REF_GetLineKind() == REF_LINE_FULL){
+				vTaskDelay(pdMS_TO_TICKS(500));
+				MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
+				MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
+				state = DRIVE;
+				}
+			break;
 		}
+
 		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));
 	}
 }
@@ -453,6 +454,10 @@ void APP_Start(void) {
 	  while(!0){} // uuuups !
   }
 
+  btn1LongSem = xSemaphoreCreateBinary();
+  if(btn1LongSem == NULL){
+	  while(!0){} // uuuups !
+  }
 
 #endif
 }
