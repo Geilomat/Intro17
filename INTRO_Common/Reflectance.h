@@ -51,6 +51,19 @@ void REF_GetSensorValues(uint16_t *values, int nofValues);
  */
 void REF_CalibrateStartStop(void);
 
+
+/*!
+ * \brief: Starts calibration, returns true if calibration could be started
+ */
+bool REF_CalibrateStart(void);
+
+/*!
+* \brief: Stops calibration, returns true if calibration has finished proberly
+*/
+bool REF_CalibrateStop(void);
+
+
+
 /*!
  * \brief returns the current line value (weighted average).
  */

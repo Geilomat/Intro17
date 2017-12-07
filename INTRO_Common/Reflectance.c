@@ -132,6 +132,27 @@ void REF_CalibrateStartStop(void) {
     (void)xSemaphoreGive(REF_StartStopSem);
   }
 }
+
+bool REF_CalibrateStart(void){
+	if(refState==REF_STATE_NOT_CALIBRATED || refState==REF_STATE_READY){
+		(void)xSemaphoreGive(REF_StartStopSem);
+		return TRUE;
+	}
+	else{
+		return FALSE;
+	}
+}
+
+bool REF_CalibrateStop(void){
+	if(refState==REF_STATE_CALIBRATING){
+		(void)xSemaphoreGive(REF_StartStopSem);
+		return TRUE;
+	}
+	else{
+		return FALSE;
+	}
+}
+
 #endif
 
 /*!
