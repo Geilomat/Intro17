@@ -462,10 +462,11 @@ static void LineFollowing(void* pvParameters) {
         break;
 
       case DRIVE:
-        if(REF_GetLineKind() == REF_LINE_NONE){
-          state = SETUP;
-          LF_StopFollowing();
-        }
+    	  if(xSemaphoreTake(btn1Sem, 0)) state = SETUP;
+        //if(REF_GetLineKind() == REF_LINE_NONE){
+        //  state = SETUP;
+        //  LF_StopFollowing();
+        //}
 
         break;
 
@@ -474,7 +475,7 @@ static void LineFollowing(void* pvParameters) {
 
 
     }
-    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));
+    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(30));
   }
 }
 #endif

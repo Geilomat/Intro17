@@ -101,15 +101,15 @@ static void StateMachine(void) {
 
     case STATE_TURN:
       lineKind = REF_GetLineKind();
-      if (lineKind==REF_LINE_FULL) {
+      if (lineKind==REF_LINE_NONE) {
         LF_currState = STATE_FINISHED;
-      } if (lineKind==REF_LINE_NONE) {
+      } else{
         TURN_Turn(TURN_LEFT180, NULL);
         DRV_SetMode(DRV_MODE_NONE); /* disable position mode */
         LF_currState = STATE_FOLLOW_SEGMENT;
-      } else {
-        LF_currState = STATE_STOP;
-      }
+      }// else {
+       // LF_currState = STATE_STOP;
+      //}
       break;
 
     case STATE_FINISHED:
@@ -209,7 +209,7 @@ void LF_Deinit(void) {
 
 void LF_Init(void) {
   LF_currState = STATE_IDLE;
-  if (xTaskCreate(LineTask, "Line", 400/sizeof(StackType_t), NULL, tskIDLE_PRIORITY, &LFTaskHandle) != pdPASS) {
+  if (xTaskCreate(LineTask, "Line", 400/sizeof(StackType_t), NULL, tskIDLE_PRIORITY+2, &LFTaskHandle) != pdPASS) {
     for(;;){} /* error */
   }
 }
