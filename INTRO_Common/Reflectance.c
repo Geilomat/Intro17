@@ -627,7 +627,7 @@ void REF_Init(void) {
   timerHandle = RefCnt_Init(NULL);
   timerTimeoutTicks = (MEASURE_TIMEOUT*RefCnt_GetInputFrequency(timerHandle))/1000;
   /*! \todo You might need to adjust priority or other task settings */
-  if (xTaskCreate(ReflTask, "Refl", 600/sizeof(StackType_t), NULL, tskIDLE_PRIORITY +2, NULL) != pdPASS) {
+  if (xTaskCreate(ReflTask, "Refl", 600/sizeof(StackType_t), NULL, tskIDLE_PRIORITY+5, NULL) != pdPASS) {
     for(;;){} /* error */
   }
 }

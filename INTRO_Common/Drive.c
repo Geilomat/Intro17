@@ -102,7 +102,7 @@ bool DRV_IsDrivingBackward(void) {
 }
 
 static bool match(int32_t pos, int32_t target) {
-  #define MATCH_MARGIN  10
+  #define MATCH_MARGIN  100
   return (pos>=target-MATCH_MARGIN && pos<=target+MATCH_MARGIN);
 }
 
@@ -113,7 +113,7 @@ bool DRV_HasTurned(void) {
     return FALSE; /* still messages in command queue, so there is something pending */
   }
   if (DRV_Status.mode==DRV_MODE_POS) {
-    #define DRV_TURN_SPEED_LOW 50
+    #define DRV_TURN_SPEED_LOW 200
     int32_t speedL, speedR;
 
     speedL = TACHO_GetSpeed(TRUE);
@@ -370,7 +370,7 @@ void DRV_Init(void) {
     for(;;){} /* out of memory? */
   }
   FRTOS1_vQueueAddToRegistry(DRV_Queue, "Drive");
-  if (xTaskCreate(DriveTask, "Drive", 400/sizeof(StackType_t), NULL, tskIDLE_PRIORITY+3, NULL) != pdPASS) {
+  if (xTaskCreate(DriveTask, "Drive", 500/sizeof(StackType_t), NULL, tskIDLE_PRIORITY+4, NULL) != pdPASS) {
     for(;;){} /* error */
   }
 }

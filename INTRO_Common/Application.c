@@ -60,7 +60,7 @@
 #endif
 #include "Sumo.h"
 
-#define PROGRAM_MODE 3 				// 0 = None, 1 = Primitive sumofighter , 2 = RealSumo, 3= Line following
+#define PROGRAM_MODE 1 				// 0 = None, 1 = Primitive sumofighter , 2 = RealSumo, 3= Line following
 
 #if PL_CONFIG_BOARD_IS_ROBO
 
@@ -328,13 +328,23 @@ static void EventHandler(void* pvParameters) {
 
 #if PL_CONFIG_BOARD_IS_ROBO
 
+static void drive(bool start) {
+	#define SPEED 50
+
+	if(start) {
+		MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
+		MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
+	} else {
+		MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
+		MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+	}
+}
+
 static void PrimitiveFight(void* PcParameters){
 	//uint16_t refValues[REF_NOF_SENSORS];
 	//int counter = 0;
 	DRIVER_STATE state = SETUP;
 	TickType_t xLastWakeTime = xTaskGetTickCount();
-
-#define SPEED 25
 
 	while(!0){
 		switch (state){
@@ -364,8 +374,7 @@ static void PrimitiveFight(void* PcParameters){
 
 		case READY:
 			if(REF_GetLineKind()==  REF_LINE_FULL){
-				DRV_SetSpeed(SPEED, SPEED);
-				DRV_SetMode(DRV_MODE_SPEED);
+				drive(TRUE);
 				state = DRIVE;
 			}
 			break;
@@ -379,27 +388,16 @@ static void PrimitiveFight(void* PcParameters){
 					// backup to the right
 					TURN_Turn(TURN_STEP_BORDER_BW, NULL);
 					TURN_Turn(TURN_RIGHT180, NULL);
-					DRV_SetSpeed(SPEED, SPEED);
-					DRV_SetMode(DRV_MODE_SPEED);
-					/*
-					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), -100);
-					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 10);
-					*/
 				} else {
 					// back up to the right
 					TURN_Turn(TURN_STEP_BORDER_BW, NULL);
 					TURN_Turn(TURN_LEFT180, NULL);
-					DRV_SetSpeed(SPEED, SPEED);
-					DRV_SetMode(DRV_MODE_SPEED);
-					/*
-					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 10);
-					MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), -100);
-					*/
 				}
-				//state = TURN;
+				DRV_SetMode(DRV_MODE_NONE);
+				drive(TRUE);
 			}
 			if(xSemaphoreTake(btn1Sem, 0)){
-				DRV_SetMode(DRV_MODE_STOP);
+				drive(FALSE);
 				state = SETUP;
 			}
 			break;
@@ -415,7 +413,7 @@ static void PrimitiveFight(void* PcParameters){
 			break;
 		}
 
-		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));
+		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(30));
 	}
 }
 
@@ -509,7 +507,7 @@ void APP_Start(void) {
    	  	  "EventHandler",
  		  configMINIMAL_STACK_SIZE + 100,
  		  (void*)NULL,
- 		  tskIDLE_PRIORITY+1,
+ 		  tskIDLE_PRIORITY+2,
  		  &taskHandleEvnetHandler
  		 );
   if(res != pdPASS) {
@@ -534,7 +532,7 @@ void APP_Start(void) {
    	  	  "PrimitiveFight",
  		  configMINIMAL_STACK_SIZE + 100,
  		  (void*)NULL,
- 		  tskIDLE_PRIORITY+1,
+ 		  tskIDLE_PRIORITY+3,
  		  &taskHandlePrimitiveFight
  		 );
   if(res != pdPASS) {
