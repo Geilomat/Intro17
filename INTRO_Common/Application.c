@@ -433,9 +433,11 @@ static void LineFollowing(void* pvParameters) {
           if(xSemaphoreTake(btn1LongSem, 600)) {
             if(REF_CalibrateStart())
               LED2_On();
+            	SHELL_SendString("Calib start\n");
               state = CALIB;
           } else if(REF_IsReady()) {
             state = READY;
+            SHELL_SendString("State = Ready \n");
           } else {
             SHELL_SendString("Line Sensors not ready\n");
           }
@@ -446,6 +448,7 @@ static void LineFollowing(void* pvParameters) {
       case CALIB:
         if(xSemaphoreTake(btn1Sem, 0)) {
           if(REF_CalibrateStop())
+        	SHELL_SendString("Calib start\n");
             LED2_Off();
             state = SETUP;
         }
@@ -471,7 +474,7 @@ static void LineFollowing(void* pvParameters) {
 
 
     }
-
+    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));
   }
 }
 #endif
