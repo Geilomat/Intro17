@@ -58,9 +58,11 @@
 #if PL_CONFIG_HAS_TURN
   #include "Turn.h"
 #endif
+#include "Distance.h"
 #include "Sumo.h"
+#include "stdlib.h"
 
-#define PROGRAM_MODE 1 				// 0 = None, 1 = Primitive sumofighter , 2 = RealSumo, 3= Line following
+#define PROGRAM_MODE 2 				// 0 = None, 1 = Primitive sumofighter , 2 = SpiralSumo, 3= Line following
 
 #if PL_CONFIG_BOARD_IS_ROBO
 
@@ -300,10 +302,10 @@ static void Blinky(void* pvParameters) {
 		LED1_Neg();
 #if PL_CONFIG_BOARD_IS_ROBO
 		if(REF_IsReady()){
-			vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(250));
+			vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(200));
 		}
 		else{
-			vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(500));
+			vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(800));
 		}
 #else
 		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(500));
@@ -328,15 +330,54 @@ static void EventHandler(void* pvParameters) {
 
 #if PL_CONFIG_BOARD_IS_ROBO
 
-static void drive(bool start) {
-	#define SPEED 50
+typedef enum {
+	DR_FW, // forward
+	DR_FS, // full speed
+	DR_ST, // stop
+	DR_LT, // left turn
+	DR_RT, // right turn
+	DR_SPI, // spiral in
+	DR_SPO, // spiral out
+} Drive_Mode;
 
-	if(start) {
-		MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), SPEED);
-		MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), SPEED);
-	} else {
-		MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
-		MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+static void drive(Drive_Mode mode) {
+	#define FW_SPEED 60
+
+	switch(mode) {
+		case DR_FW:
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), FW_SPEED);
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), FW_SPEED);
+			break;
+
+		case DR_FS:
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 100);
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 100);
+			break;
+
+		case DR_ST:
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+			break;
+
+		case DR_LT:
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 20);
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), -100);
+			break;
+
+		case DR_RT:
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), -100);
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 20);
+			break;
+
+		case DR_SPI:
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 25);
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 70);
+			break;
+
+		case DR_SPO:
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 30);
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 65);
+			break;
 	}
 }
 
@@ -374,7 +415,7 @@ static void PrimitiveFight(void* PcParameters){
 
 		case READY:
 			if(REF_GetLineKind()==  REF_LINE_FULL){
-				drive(TRUE);
+				drive(DR_FW);
 				state = DRIVE;
 			}
 			break;
@@ -384,20 +425,35 @@ static void PrimitiveFight(void* PcParameters){
 			if(REF_GetLineKind() !=  REF_LINE_FULL){
 				uint16_t refValues[REF_NOF_SENSORS];
 				REF_GetSensorValues(refValues, REF_NOF_SENSORS);
+
+				//TURN_Turn(TURN_STEP_BORDER_BW, NULL);
+				//DRV_SetMode(DRV_MODE_NONE);
+
 				if(refValues[0] < 300) {
 					// backup to the right
-					TURN_Turn(TURN_STEP_BORDER_BW, NULL);
-					TURN_Turn(TURN_RIGHT180, NULL);
+					drive(DR_RT);
 				} else {
-					// back up to the right
-					TURN_Turn(TURN_STEP_BORDER_BW, NULL);
-					TURN_Turn(TURN_LEFT180, NULL);
+					// back up to the left
+					drive(DR_LT);
 				}
-				DRV_SetMode(DRV_MODE_NONE);
-				drive(TRUE);
+
+				vTaskDelay(pdMS_TO_TICKS(300));
+				drive(DR_FW);
 			}
+
+			bool prox, last_prox;
+			prox = DIST_NearFrontObstacle(100);
+			if(prox != last_prox){
+				if(prox){
+					drive(DR_FS);
+				} else {
+					drive(DR_FW);
+				}
+			}
+			last_prox = prox;
+
 			if(xSemaphoreTake(btn1Sem, 0)){
-				drive(FALSE);
+				drive(DR_ST);
 				state = SETUP;
 			}
 			break;
@@ -405,11 +461,81 @@ static void PrimitiveFight(void* PcParameters){
 
 		case TURN:
 			if(REF_GetLineKind() == REF_LINE_FULL){
-				vTaskDelay(pdMS_TO_TICKS(500));
-				DRV_SetSpeed(SPEED, SPEED);
-				DRV_SetMode(DRV_MODE_SPEED);
-				state = DRIVE;
+				vTaskDelay(pdMS_TO_TICKS(500 + rand()%500));
+
+			}
+			break;
+		}
+
+		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(30));
+	}
+}
+
+
+static void SpiralFight(void* PcParameters){
+	//uint16_t refValues[REF_NOF_SENSORS];
+	//int counter = 0;
+	DRIVER_STATE state = SETUP;
+	TickType_t xLastWakeTime = xTaskGetTickCount();
+
+	while(!0){
+		switch (state){
+		case SETUP:
+			if(xSemaphoreTake(btn1Sem, 0)){
+				if(xSemaphoreTake(btn1LongSem, 600)) {
+					if(REF_CalibrateStart()) {
+						LED2_On();
+						state = CALIB;
+					}
+				} else if(REF_IsReady()) {
+					state = READY;
+				} else {
+					SHELL_SendString("Line Sensors not ready\n");
 				}
+			}
+			break;
+
+		case CALIB:
+			if(xSemaphoreTake(btn1Sem, 0)) {
+				if(REF_CalibrateStop()) {
+					LED2_Off();
+					state = SETUP;
+				}
+			}
+			break;
+
+		case READY:
+			if(REF_GetLineKind()==  REF_LINE_FULL){
+				drive(DR_SPO);
+				state = DRIVE;
+			}
+			break;
+
+
+		case DRIVE:
+			if(REF_GetLineKind() !=  REF_LINE_FULL){
+				uint16_t refValues[REF_NOF_SENSORS];
+				REF_GetSensorValues(refValues, REF_NOF_SENSORS);
+				drive(DR_SPI);
+				vTaskDelay(pdMS_TO_TICKS(500));
+				drive(DR_SPO);
+			}
+
+			bool prox, last_prox;
+			prox = DIST_NearFrontObstacle(100);
+			if(prox != last_prox){
+				if(prox){
+					drive(DR_FS);
+				} else {
+					drive(DR_SPO);
+				}
+			}
+			last_prox = prox;
+
+			if(xSemaphoreTake(btn1Sem, 0)){
+				drive(DR_ST);
+				state = SETUP;
+			}
 			break;
 		}
 
@@ -541,7 +667,17 @@ void APP_Start(void) {
 #endif
 
 #if PROGRAM_MODE == 2
-
+  xTaskHandle taskHandleSpiralFight;
+  res = xTaskCreate(SpiralFight,
+   	  	  "SpiralFight",
+ 		  configMINIMAL_STACK_SIZE + 100,
+ 		  (void*)NULL,
+ 		  tskIDLE_PRIORITY+3,
+ 		  &taskHandleSpiralFight
+ 		 );
+  if(res != pdPASS) {
+	  for(;;) {} // shiit
+  }
 #endif
 
 #if PROGRAM_MODE == 3

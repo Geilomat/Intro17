@@ -30,7 +30,7 @@
   #include "NVM_Config.h"
 #endif
 
-#define MEASURE_TIMEOUT		  5 /* [ms] */
+#define MEASURE_TIMEOUT		  2 /* [ms] */
 
 #define REF_NOF_SENSORS       6 /* number of sensors */
 #define REF_SENSOR1_IS_LEFT   1 /* sensor number one is on the left side */
@@ -606,7 +606,7 @@ static void ReflTask (void *pvParameters) {
   (void)pvParameters; /* not used */
   for(;;) {
     REF_StateMachine();
-    FRTOS1_vTaskDelay(10/portTICK_PERIOD_MS);
+    FRTOS1_vTaskDelay(5/portTICK_PERIOD_MS);
   }
 }
 

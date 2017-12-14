@@ -263,7 +263,7 @@ bool DIST_NearFrontObstacle(int16_t distance) {
 
   val = DIST_GetToFDistance(DIST_TOF_FRONT);
   if (val<0) {
-    return TRUE; /* sensor failure? */
+    return FALSE; /* sensor failure? */
   }
   return val>=0 && val<=distance;
 #else
@@ -278,7 +278,7 @@ bool DIST_NearRearObstacle(int distance) {
 
   val = DIST_GetToFDistance(DIST_TOF_REAR);
   if (val<0) {
-    return TRUE; /* sensor failure? */
+    return FALSE; /* sensor failure? */
   }
   return val>=0 && val<=distance;
 #else
@@ -293,7 +293,7 @@ bool DIST_NearLeftObstacle(int distance) {
 
   val = DIST_GetToFDistance(DIST_TOF_LEFT);
   if (val<0) {
-    return TRUE; /* sensor failure? */
+    return FALSE; /* sensor failure? */
   }
   return val>=0 && val<=distance;
 #else
@@ -308,7 +308,7 @@ bool DIST_NearRightObstacle(int distance) {
 
   val = DIST_GetToFDistance(DIST_TOF_RIGHT);
   if (val<0) {
-    return TRUE; /* sensor failure? */
+    return FALSE; /* sensor failure? */
   }
   return val>=0 && val<=distance;
 #else
