@@ -62,7 +62,7 @@
 #include "Sumo.h"
 #include "stdlib.h"
 
-#define PROGRAM_MODE 2 				// 0 = None, 1 = Primitive sumofighter , 2 = SpiralSumo, 3= Line following
+#define PROGRAM_MODE 1 				// 0 = None, 1 = Primitive sumofighter , 2 = SpiralSumo, 3= Line following
 
 #if PL_CONFIG_BOARD_IS_ROBO
 
@@ -103,7 +103,7 @@ static void BtnMsg(int btn, const char *msg) {
     CLS1_SendStr("\r\n", CLS1_GetStdio()->stdOut);
   #endif
 #endif
-#if PL_CONFIG_HAS_BUZZER
+#if PL_CONFIG_HAS_BUZZER && 0
     BUZ_PlayTune(BUZ_TUNE_BUTTON);
 #endif
 }
@@ -127,14 +127,15 @@ void APP_EventHandler(EVNT_Handle event) {
 #if PL_CONFIG_NOF_KEYS>=1
   case EVNT_SW1_PRESSED:
 	 xSemaphoreGive(btn1Sem);
-     BtnMsg(1, "pressed");
+     //BtnMsg(1, "pressed");
+     BUZ_PlayTune(BUZ_TUNE_BUTTON);
      break;
   case EVNT_SW1_LPRESSED:
 	 xSemaphoreGive(btn1LongSem);
-     BtnMsg(1, "long pressed");
+     //BtnMsg(1, "long pressed");
      break;
   case EVNT_SW1_RELEASED:
-     BtnMsg(1, "released");
+     //BtnMsg(1, "released");
      break;
 #endif
 #if PL_CONFIG_NOF_KEYS>=2
@@ -330,12 +331,15 @@ static void EventHandler(void* pvParameters) {
 
 #if PL_CONFIG_BOARD_IS_ROBO
 
+
 typedef enum {
 	DR_FW, // forward
 	DR_FS, // full speed
 	DR_ST, // stop
 	DR_LT, // left turn
 	DR_RT, // right turn
+	DR_L90, // left 90°
+	DR_R90, // right 90°
 	DR_SPI, // spiral in
 	DR_SPO, // spiral out
 } Drive_Mode;
@@ -369,6 +373,16 @@ static void drive(Drive_Mode mode) {
 			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 20);
 			break;
 
+		case DR_L90:
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), -70);
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 70);
+			break;
+
+		case DR_R90:
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 70);
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), -70);
+			break;
+
 		case DR_SPI:
 			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 25);
 			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 70);
@@ -382,8 +396,10 @@ static void drive(Drive_Mode mode) {
 }
 
 static void PrimitiveFight(void* PcParameters){
-	//uint16_t refValues[REF_NOF_SENSORS];
-	//int counter = 0;
+	int randCount = 0;
+	int rando[] = {400, 300, 400, 450};
+	int maxRand = 4;
+
 	DRIVER_STATE state = SETUP;
 	TickType_t xLastWakeTime = xTaskGetTickCount();
 
@@ -391,13 +407,17 @@ static void PrimitiveFight(void* PcParameters){
 		switch (state){
 		case SETUP:
 			if(xSemaphoreTake(btn1Sem, 0)){
-				if(xSemaphoreTake(btn1LongSem, 600)) {
+				if(xSemaphoreTake(btn1LongSem, 1000)) {
 					if(REF_CalibrateStart()) {
 						LED2_On();
 						state = CALIB;
 					}
 				} else if(REF_IsReady()) {
-					state = READY;
+					SHELL_SendString("DRIVE\n");
+					vTaskDelay(pdMS_TO_TICKS(1000));
+					drive(DR_FW);
+					SHELL_SendString("GO!\n");
+					state = DRIVE;
 				} else {
 					SHELL_SendString("Line Sensors not ready\n");
 				}
@@ -413,21 +433,11 @@ static void PrimitiveFight(void* PcParameters){
 			}
 			break;
 
-		case READY:
-			if(REF_GetLineKind()==  REF_LINE_FULL){
-				drive(DR_FW);
-				state = DRIVE;
-			}
-			break;
-
 
 		case DRIVE:
 			if(REF_GetLineKind() !=  REF_LINE_FULL){
 				uint16_t refValues[REF_NOF_SENSORS];
 				REF_GetSensorValues(refValues, REF_NOF_SENSORS);
-
-				//TURN_Turn(TURN_STEP_BORDER_BW, NULL);
-				//DRV_SetMode(DRV_MODE_NONE);
 
 				if(refValues[0] < 300) {
 					// backup to the right
@@ -437,7 +447,9 @@ static void PrimitiveFight(void* PcParameters){
 					drive(DR_LT);
 				}
 
-				vTaskDelay(pdMS_TO_TICKS(300));
+				vTaskDelay(pdMS_TO_TICKS(rando[randCount]));
+				randCount++;
+				if(randCount == maxRand) randCount = 0;
 				drive(DR_FW);
 			}
 
@@ -452,22 +464,29 @@ static void PrimitiveFight(void* PcParameters){
 			}
 			last_prox = prox;
 
+			if(DIST_NearLeftObstacle(200)) {
+				drive(DR_L90);
+				vTaskDelay(pdMS_TO_TICKS(200));
+				drive(DR_FW);
+				vTaskDelay(pdMS_TO_TICKS(200));
+			}
+
+			if(DIST_NearRightObstacle(200)) {
+				drive(DR_R90);
+				vTaskDelay(pdMS_TO_TICKS(200));
+				drive(DR_FW);
+				vTaskDelay(pdMS_TO_TICKS(200));
+			}
+
 			if(xSemaphoreTake(btn1Sem, 0)){
 				drive(DR_ST);
+				SHELL_SendString("SETUP\n");
 				state = SETUP;
-			}
-			break;
-
-
-		case TURN:
-			if(REF_GetLineKind() == REF_LINE_FULL){
-				vTaskDelay(pdMS_TO_TICKS(500 + rand()%500));
-
 			}
 			break;
 		}
 
-		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(30));
+		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));
 	}
 }
 
@@ -633,7 +652,7 @@ void APP_Start(void) {
    	  	  "EventHandler",
  		  configMINIMAL_STACK_SIZE + 100,
  		  (void*)NULL,
- 		  tskIDLE_PRIORITY+2,
+ 		  tskIDLE_PRIORITY+3,
  		  &taskHandleEvnetHandler
  		 );
   if(res != pdPASS) {

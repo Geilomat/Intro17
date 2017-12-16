@@ -565,7 +565,7 @@ static void REF_StateMachine(void) {
     
     case REF_STATE_CALIBRATING:
       REF_CalibrateMinMax(SensorCalibMinMax.minVal, SensorCalibMinMax.maxVal, SensorRaw);
-#if PL_CONFIG_HAS_BUZZER
+#if PL_CONFIG_HAS_BUZZER && 0
       (void)BUZ_Beep(300, 20);
 #endif
 #if REF_START_STOP_CALIB
@@ -606,7 +606,7 @@ static void ReflTask (void *pvParameters) {
   (void)pvParameters; /* not used */
   for(;;) {
     REF_StateMachine();
-    FRTOS1_vTaskDelay(5/portTICK_PERIOD_MS);
+    FRTOS1_vTaskDelay(10/portTICK_PERIOD_MS);
   }
 }
 
