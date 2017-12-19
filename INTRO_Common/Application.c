@@ -334,7 +334,8 @@ static void EventHandler(void* pvParameters) {
 
 typedef enum {
 	DR_FW, // forward
-	DR_FS, // full speed
+	DR_FSF, // full speed forward
+	DR_FSB, // full speed backward
 	DR_ST, // stop
 	DR_LT, // left turn
 	DR_RT, // right turn
@@ -353,9 +354,14 @@ static void drive(Drive_Mode mode) {
 			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), FW_SPEED);
 			break;
 
-		case DR_FS:
+		case DR_FSF:
 			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 100);
 			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 100);
+			break;
+
+		case DR_FSB:
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), -100);
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), -100);
 			break;
 
 		case DR_ST:
@@ -453,29 +459,40 @@ static void PrimitiveFight(void* PcParameters){
 				drive(DR_FW);
 			}
 
-			bool prox, last_prox;
-			prox = DIST_NearFrontObstacle(100);
-			if(prox != last_prox){
-				if(prox){
-					drive(DR_FS);
+			bool prox_f, last_prox_f;
+			prox_f = DIST_NearFrontObstacle(100);
+			if(prox_f != last_prox_f){
+				if(prox_f){
+					drive(DR_FSF);
 				} else {
 					drive(DR_FW);
 				}
 			}
-			last_prox = prox;
+			last_prox_f = prox_f;
+
+			bool prox_b, last_prox_b;
+			prox_b = DIST_NearRearObstacle(100);
+			if(prox_b != last_prox_b){
+				if(prox_b){
+					drive(DR_FSB);
+				} else {
+					drive(DR_FW);
+				}
+			}
+			last_prox_b = prox_b;
 
 			if(DIST_NearLeftObstacle(200)) {
 				drive(DR_L90);
-				vTaskDelay(pdMS_TO_TICKS(200));
+				vTaskDelay(pdMS_TO_TICKS(100)); // old 200
 				drive(DR_FW);
-				vTaskDelay(pdMS_TO_TICKS(200));
+				vTaskDelay(pdMS_TO_TICKS(100)); // old 200
 			}
 
 			if(DIST_NearRightObstacle(200)) {
 				drive(DR_R90);
-				vTaskDelay(pdMS_TO_TICKS(200));
+				vTaskDelay(pdMS_TO_TICKS(100));
 				drive(DR_FW);
-				vTaskDelay(pdMS_TO_TICKS(200));
+				vTaskDelay(pdMS_TO_TICKS(100));
 			}
 
 			if(xSemaphoreTake(btn1Sem, 0)){
@@ -544,7 +561,7 @@ static void SpiralFight(void* PcParameters){
 			prox = DIST_NearFrontObstacle(100);
 			if(prox != last_prox){
 				if(prox){
-					drive(DR_FS);
+					drive(DR_FSF);
 				} else {
 					drive(DR_SPO);
 				}
