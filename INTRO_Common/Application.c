@@ -406,6 +406,9 @@ static void PrimitiveFight(void* PcParameters){
 	int rando[] = {400, 300, 400, 450};
 	int maxRand = 4;
 
+	// read front and back ToF sensors
+	bool prox_f, last_prox_f, prox_b, last_prox_b;
+
 	DRIVER_STATE state = SETUP;
 	TickType_t xLastWakeTime = xTaskGetTickCount();
 
@@ -420,7 +423,7 @@ static void PrimitiveFight(void* PcParameters){
 					}
 				} else if(REF_IsReady()) {
 					SHELL_SendString("DRIVE\n");
-					vTaskDelay(pdMS_TO_TICKS(1000));
+					vTaskDelay(pdMS_TO_TICKS(4000));
 					drive(DR_FW);
 					SHELL_SendString("GO!\n");
 					state = DRIVE;
@@ -441,7 +444,16 @@ static void PrimitiveFight(void* PcParameters){
 
 
 		case DRIVE:
-			if(REF_GetLineKind() !=  REF_LINE_FULL){
+			prox_f = DIST_NearFrontObstacle(100);
+			prox_b = DIST_NearRearObstacle(100);
+
+			if(xSemaphoreTake(btn1Sem, 0)){
+				drive(DR_ST);
+				SHELL_SendString("SETUP\n");
+				state = SETUP;
+			}
+
+			else if(REF_GetLineKind() !=  REF_LINE_FULL){
 				uint16_t refValues[REF_NOF_SENSORS];
 				REF_GetSensorValues(refValues, REF_NOF_SENSORS);
 
@@ -459,47 +471,39 @@ static void PrimitiveFight(void* PcParameters){
 				drive(DR_FW);
 			}
 
-			bool prox_f, last_prox_f;
-			prox_f = DIST_NearFrontObstacle(100);
-			if(prox_f != last_prox_f){
+			else if(prox_f != last_prox_f){
 				if(prox_f){
 					drive(DR_FSF);
 				} else {
 					drive(DR_FW);
 				}
 			}
-			last_prox_f = prox_f;
 
-			bool prox_b, last_prox_b;
-			prox_b = DIST_NearRearObstacle(100);
-			if(prox_b != last_prox_b){
+			else if(prox_b != last_prox_b){
 				if(prox_b){
 					drive(DR_FSB);
 				} else {
 					drive(DR_FW);
 				}
 			}
+
+			else if(DIST_NearLeftObstacle(200)) {
+				drive(DR_L90);
+				vTaskDelay(pdMS_TO_TICKS(200)); // old 100
+				drive(DR_FW);
+				vTaskDelay(pdMS_TO_TICKS(200)); // old 100
+			}
+
+			else if(DIST_NearRightObstacle(200)) {
+				drive(DR_R90);
+				vTaskDelay(pdMS_TO_TICKS(200));
+				drive(DR_FW);
+				vTaskDelay(pdMS_TO_TICKS(200));
+			}
+
+			last_prox_f = prox_f;
 			last_prox_b = prox_b;
 
-			if(DIST_NearLeftObstacle(200)) {
-				drive(DR_L90);
-				vTaskDelay(pdMS_TO_TICKS(100)); // old 200
-				drive(DR_FW);
-				vTaskDelay(pdMS_TO_TICKS(100)); // old 200
-			}
-
-			if(DIST_NearRightObstacle(200)) {
-				drive(DR_R90);
-				vTaskDelay(pdMS_TO_TICKS(100));
-				drive(DR_FW);
-				vTaskDelay(pdMS_TO_TICKS(100));
-			}
-
-			if(xSemaphoreTake(btn1Sem, 0)){
-				drive(DR_ST);
-				SHELL_SendString("SETUP\n");
-				state = SETUP;
-			}
 			break;
 		}
 
