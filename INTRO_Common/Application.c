@@ -518,8 +518,6 @@ static void SpiralFight(void* PcParameters){
 	DRIVER_STATE state = SETUP;
 	TickType_t xLastWakeTime = xTaskGetTickCount();
 
-	int i = 100;
-
 	while(!0){
 		switch (state){
 		case SETUP:
